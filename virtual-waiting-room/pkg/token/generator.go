@@ -5,7 +5,7 @@ import (
 	"encoding/hex"
 )
 
-func GenerateAccessToken() (string, error) {
+func GenerateUniqueAccessToken() (string, error) {
 	token := make([]byte, 32)
 
 	_, err := rand.Read(token)
