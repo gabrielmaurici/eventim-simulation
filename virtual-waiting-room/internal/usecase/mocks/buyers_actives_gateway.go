@@ -6,9 +6,9 @@ type BuyersActivesGatewayMock struct {
 	mock.Mock
 }
 
-func (m *BuyersActivesGatewayMock) GetBuyersActives() (total int, err error) {
+func (m *BuyersActivesGatewayMock) GetBuyersActives() (total int64, err error) {
 	args := m.Called()
-	return args.Int(0), args.Error(1)
+	return int64(args.Int(0)), args.Error(1)
 }
 
 func (m *BuyersActivesGatewayMock) Add(token string) (err error) {

@@ -9,20 +9,20 @@ import (
 
 type EntryQueueOutputUseCaseDTO struct {
 	Token    string `json:"token"`
-	Position int    `json:"position"`
+	Position int64  `json:"position"`
 }
 
 type EntryQueueUseCase struct {
-	BuyersActivesGateway    gateway.BuyersActivesGateway
-	QueueWaitingRoomGateway gateway.QueueWaitingRoomGateway
+	BuyersActivesGateway gateway.BuyersActivesGateway
+	VirtualQueueGateway  gateway.VirtualQueueGateway
 }
 
 const MaxBuyersActivesCapacity = 5
 
-func NewEntryQueueUseCase(bg gateway.BuyersActivesGateway, qg gateway.QueueWaitingRoomGateway) *EntryQueueUseCase {
+func NewEntryQueueUseCase(bg gateway.BuyersActivesGateway, vq gateway.VirtualQueueGateway) *EntryQueueUseCase {
 	return &EntryQueueUseCase{
-		BuyersActivesGateway:    bg,
-		QueueWaitingRoomGateway: qg,
+		BuyersActivesGateway: bg,
+		VirtualQueueGateway:  vq,
 	}
 }
 
@@ -37,14 +37,14 @@ func (uc *EntryQueueUseCase) Execute() (output *EntryQueueOutputUseCaseDTO, err 
 		return nil, fmt.Errorf("erro ao obter compradores ativos: %w", err)
 	}
 
-	var position int
+	var position int64
 	if buyersActivesTotal < MaxBuyersActivesCapacity {
 		err = uc.BuyersActivesGateway.Add(token)
 		if err != nil {
 			return nil, fmt.Errorf("erro ao adicionar usuário ao grupo de compradores ativos: %w", err)
 		}
 	} else {
-		position, err = uc.QueueWaitingRoomGateway.Enqueue(token)
+		position, err = uc.VirtualQueueGateway.Enqueue(token)
 		if err != nil {
 			return nil, fmt.Errorf("erro ao adicionar usuário a fila de espera: %w", err)
 		}

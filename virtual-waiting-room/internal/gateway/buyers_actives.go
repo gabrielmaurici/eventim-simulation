@@ -1,6 +1,6 @@
 package gateway
 
 type BuyersActivesGateway interface {
-	GetBuyersActives() (total int, err error)
+	GetBuyersActives() (total int64, err error)
 	Add(token string) (err error)
 }

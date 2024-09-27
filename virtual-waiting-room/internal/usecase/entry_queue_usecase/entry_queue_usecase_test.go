@@ -16,10 +16,10 @@ func Test_WhenActiveBuyersCapacityIsAvailable_Execute_ReturnsExpectedOutput(t *t
 		Position: 0,
 	}
 	buyersActivesGatewayMock := &mocks.BuyersActivesGatewayMock{}
-	queueWaitingRoomGatewayMock := &mocks.QueueWaitingRoomGatewayMock{}
+	virtualQueueGatewayMock := &mocks.VirtualQueueGatewayMock{}
 	buyersActivesGatewayMock.On("GetBuyersActives").Return(1, nil)
 	buyersActivesGatewayMock.On("Add", mock.Anything).Return(nil)
-	entryQueueUsecase := NewEntryQueueUseCase(buyersActivesGatewayMock, queueWaitingRoomGatewayMock)
+	entryQueueUsecase := NewEntryQueueUseCase(buyersActivesGatewayMock, virtualQueueGatewayMock)
 
 	output, _ := entryQueueUsecase.Execute()
 
@@ -27,7 +27,7 @@ func Test_WhenActiveBuyersCapacityIsAvailable_Execute_ReturnsExpectedOutput(t *t
 	assert.Equal(t, outputExpected.Position, output.Position)
 	buyersActivesGatewayMock.AssertNumberOfCalls(t, "GetBuyersActives", 1)
 	buyersActivesGatewayMock.AssertNumberOfCalls(t, "Add", 1)
-	queueWaitingRoomGatewayMock.AssertNumberOfCalls(t, "Enqueue", 0)
+	virtualQueueGatewayMock.AssertNumberOfCalls(t, "Enqueue", 0)
 }
 
 func Test_WhenActiveBuyersCapacityIsNotAvailable_Execute_ReturnsExpectedOutput(t *testing.T) {
@@ -37,10 +37,10 @@ func Test_WhenActiveBuyersCapacityIsNotAvailable_Execute_ReturnsExpectedOutput(t
 		Position: 10,
 	}
 	buyersActivesGatewayMock := &mocks.BuyersActivesGatewayMock{}
-	queueWaitingRoomGatewayMock := &mocks.QueueWaitingRoomGatewayMock{}
+	virtualQueueGatewayMock := &mocks.VirtualQueueGatewayMock{}
 	buyersActivesGatewayMock.On("GetBuyersActives").Return(10, nil)
-	queueWaitingRoomGatewayMock.On("Enqueue", mock.Anything).Return(outputExpected.Position, nil)
-	entryQueueUsecase := NewEntryQueueUseCase(buyersActivesGatewayMock, queueWaitingRoomGatewayMock)
+	virtualQueueGatewayMock.On("Enqueue", mock.Anything).Return(outputExpected.Position, nil)
+	entryQueueUsecase := NewEntryQueueUseCase(buyersActivesGatewayMock, virtualQueueGatewayMock)
 
 	output, _ := entryQueueUsecase.Execute()
 
@@ -48,5 +48,5 @@ func Test_WhenActiveBuyersCapacityIsNotAvailable_Execute_ReturnsExpectedOutput(t
 	assert.Equal(t, outputExpected.Position, output.Position)
 	buyersActivesGatewayMock.AssertNumberOfCalls(t, "GetBuyersActives", 1)
 	buyersActivesGatewayMock.AssertNumberOfCalls(t, "Add", 0)
-	queueWaitingRoomGatewayMock.AssertNumberOfCalls(t, "Enqueue", 1)
+	virtualQueueGatewayMock.AssertNumberOfCalls(t, "Enqueue", 1)
 }
