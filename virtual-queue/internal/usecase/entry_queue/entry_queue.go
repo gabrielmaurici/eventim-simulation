@@ -1,4 +1,4 @@
-package entry_queue_usecase
+package entry_queue
 
 import (
 	"fmt"
@@ -43,11 +43,16 @@ func (uc *EntryQueueUseCase) Execute() (output *EntryQueueOutputUseCaseDTO, err 
 		if err != nil {
 			return nil, fmt.Errorf("erro ao adicionar usuário ao grupo de compradores ativos: %w", err)
 		}
-	} else {
-		position, err = uc.VirtualQueueGateway.Enqueue(token)
-		if err != nil {
-			return nil, fmt.Errorf("erro ao adicionar usuário a fila de espera: %w", err)
-		}
+
+		return &EntryQueueOutputUseCaseDTO{
+			Token:    token,
+			Position: 1,
+		}, nil
+	}
+
+	position, err = uc.VirtualQueueGateway.Enqueue(token)
+	if err != nil {
+		return nil, fmt.Errorf("erro ao adicionar usuário a fila de espera: %w", err)
 	}
 
 	return &EntryQueueOutputUseCaseDTO{

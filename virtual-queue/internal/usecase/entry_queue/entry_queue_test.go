@@ -1,4 +1,4 @@
-package entry_queue_usecase
+package entry_queue
 
 import (
 	"testing"

@@ -3,6 +3,7 @@ module github.com/gabrielmaurici/eventim-simulation
 go 1.23.1
 
 require (
+	github.com/go-chi/chi/v5 v5.1.0
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/stretchr/testify v1.9.0
 )
