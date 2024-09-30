@@ -1,4 +1,4 @@
-package entry_queue
+package entry_virtual_queue
 
 import (
 	"testing"
@@ -11,7 +11,7 @@ import (
 
 func Test_WhenActiveBuyersCapacityIsAvailable_Execute_ReturnsExpectedOutput(t *testing.T) {
 	token, _ := token.GenerateUniqueAccessToken()
-	outputExpected := &EntryQueueOutputUseCaseDTO{
+	outputExpected := &EntryVirtualQueueOutputUseCaseDTO{
 		Token:    token,
 		Position: 0,
 	}
@@ -19,9 +19,9 @@ func Test_WhenActiveBuyersCapacityIsAvailable_Execute_ReturnsExpectedOutput(t *t
 	virtualQueueGatewayMock := &mocks.VirtualQueueGatewayMock{}
 	buyersActivesGatewayMock.On("GetBuyersActives").Return(1, nil)
 	buyersActivesGatewayMock.On("Add", mock.Anything).Return(nil)
-	entryQueueUsecase := NewEntryQueueUseCase(buyersActivesGatewayMock, virtualQueueGatewayMock)
+	entryVirtualQueueUsecase := NewEntryQueueUseCase(buyersActivesGatewayMock, virtualQueueGatewayMock)
 
-	output, _ := entryQueueUsecase.Execute()
+	output, _ := entryVirtualQueueUsecase.Execute()
 
 	assert.Equal(t, len(outputExpected.Token), len(output.Token))
 	assert.Equal(t, outputExpected.Position, output.Position)
@@ -32,7 +32,7 @@ func Test_WhenActiveBuyersCapacityIsAvailable_Execute_ReturnsExpectedOutput(t *t
 
 func Test_WhenActiveBuyersCapacityIsNotAvailable_Execute_ReturnsExpectedOutput(t *testing.T) {
 	token, _ := token.GenerateUniqueAccessToken()
-	outputExpected := &EntryQueueOutputUseCaseDTO{
+	outputExpected := &EntryVirtualQueueOutputUseCaseDTO{
 		Token:    token,
 		Position: 10,
 	}
@@ -40,9 +40,9 @@ func Test_WhenActiveBuyersCapacityIsNotAvailable_Execute_ReturnsExpectedOutput(t
 	virtualQueueGatewayMock := &mocks.VirtualQueueGatewayMock{}
 	buyersActivesGatewayMock.On("GetBuyersActives").Return(10, nil)
 	virtualQueueGatewayMock.On("Enqueue", mock.Anything).Return(outputExpected.Position, nil)
-	entryQueueUsecase := NewEntryQueueUseCase(buyersActivesGatewayMock, virtualQueueGatewayMock)
+	entryVirtualQueueUsecase := NewEntryQueueUseCase(buyersActivesGatewayMock, virtualQueueGatewayMock)
 
-	output, _ := entryQueueUsecase.Execute()
+	output, _ := entryVirtualQueueUsecase.Execute()
 
 	assert.Equal(t, len(outputExpected.Token), len(output.Token))
 	assert.Equal(t, outputExpected.Position, output.Position)

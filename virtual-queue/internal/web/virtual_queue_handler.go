@@ -4,21 +4,21 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/gabrielmaurici/eventim-simulation/internal/usecase/entry_queue"
+	"github.com/gabrielmaurici/eventim-simulation/internal/usecase/entry_virtual_queue"
 )
 
 type WebVirtualQueueHandler struct {
-	EntryQueueUseCase entry_queue.EntryQueueUseCase
+	EntryVirtualQueueUseCase entry_virtual_queue.EntryVirtualQueueUseCase
 }
 
-func NewWebVirtualQueueHandler(uc entry_queue.EntryQueueUseCase) *WebVirtualQueueHandler {
+func NewWebVirtualQueueHandler(uc entry_virtual_queue.EntryVirtualQueueUseCase) *WebVirtualQueueHandler {
 	return &WebVirtualQueueHandler{
-		EntryQueueUseCase: uc,
+		EntryVirtualQueueUseCase: uc,
 	}
 }
 
 func (h *WebVirtualQueueHandler) EntryQueue(w http.ResponseWriter, r *http.Request) {
-	output, err := h.EntryQueueUseCase.Execute()
+	output, err := h.EntryVirtualQueueUseCase.Execute()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))

@@ -1,4 +1,4 @@
-package entry_queue
+package entry_virtual_queue
 
 import (
 	"fmt"
@@ -7,46 +7,46 @@ import (
 	"github.com/gabrielmaurici/eventim-simulation/pkg/token"
 )
 
-type EntryQueueOutputUseCaseDTO struct {
+type EntryVirtualQueueOutputUseCaseDTO struct {
 	Token    string `json:"token"`
 	Position int64  `json:"position"`
 }
 
-type EntryQueueUseCase struct {
+type EntryVirtualQueueUseCase struct {
 	BuyersActivesGateway gateway.BuyersActivesGateway
 	VirtualQueueGateway  gateway.VirtualQueueGateway
 }
 
 const MaxBuyersActivesCapacity = 5
 
-func NewEntryQueueUseCase(bg gateway.BuyersActivesGateway, vq gateway.VirtualQueueGateway) *EntryQueueUseCase {
-	return &EntryQueueUseCase{
-		BuyersActivesGateway: bg,
-		VirtualQueueGateway:  vq,
+func NewEntryQueueUseCase(b gateway.BuyersActivesGateway, v gateway.VirtualQueueGateway) *EntryVirtualQueueUseCase {
+	return &EntryVirtualQueueUseCase{
+		BuyersActivesGateway: b,
+		VirtualQueueGateway:  v,
 	}
 }
 
-func (uc *EntryQueueUseCase) Execute() (output *EntryQueueOutputUseCaseDTO, err error) {
+func (uc *EntryVirtualQueueUseCase) Execute() (output *EntryVirtualQueueOutputUseCaseDTO, err error) {
 	token, err := token.GenerateUniqueAccessToken()
 	if err != nil {
 		return nil, fmt.Errorf("erro ao gerar token de acesso único: %w", err)
 	}
 
-	buyersActivesTotal, err := uc.BuyersActivesGateway.GetBuyersActives()
+	totalBuyersActives, err := uc.BuyersActivesGateway.GetBuyersActives()
 	if err != nil {
 		return nil, fmt.Errorf("erro ao obter compradores ativos: %w", err)
 	}
 
 	var position int64
-	if buyersActivesTotal < MaxBuyersActivesCapacity {
+	if totalBuyersActives < MaxBuyersActivesCapacity {
 		err = uc.BuyersActivesGateway.Add(token)
 		if err != nil {
 			return nil, fmt.Errorf("erro ao adicionar usuário ao grupo de compradores ativos: %w", err)
 		}
 
-		return &EntryQueueOutputUseCaseDTO{
+		return &EntryVirtualQueueOutputUseCaseDTO{
 			Token:    token,
-			Position: 1,
+			Position: 0,
 		}, nil
 	}
 
@@ -55,7 +55,7 @@ func (uc *EntryQueueUseCase) Execute() (output *EntryQueueOutputUseCaseDTO, err 
 		return nil, fmt.Errorf("erro ao adicionar usuário a fila de espera: %w", err)
 	}
 
-	return &EntryQueueOutputUseCaseDTO{
+	return &EntryVirtualQueueOutputUseCaseDTO{
 		Token:    token,
 		Position: position,
 	}, nil
