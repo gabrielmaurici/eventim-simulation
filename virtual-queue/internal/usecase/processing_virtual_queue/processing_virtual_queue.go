@@ -4,21 +4,30 @@ import (
 	"fmt"
 
 	"github.com/gabrielmaurici/eventim-simulation/internal/gateway"
+	"github.com/gabrielmaurici/eventim-simulation/pkg/rabbitmq"
 )
+
+type NotificationPositionRabbitMQ struct {
+	Token    string `json:"token"`
+	Position int64  `json:"position"`
+}
 
 type ProcessingVirtualQueueUseCase struct {
 	BuyersActivesGateway gateway.BuyersActivesGateway
 	VirtualQueueGateway  gateway.VirtualQueueGateway
+	Producer             rabbitmq.Producer
 }
 
 const MaxBuyersActivesCapacity = 5
 
 func NewProcessingVirtualQueueUseCase(
 	b gateway.BuyersActivesGateway,
-	v gateway.VirtualQueueGateway) *ProcessingVirtualQueueUseCase {
+	v gateway.VirtualQueueGateway,
+	p rabbitmq.Producer) *ProcessingVirtualQueueUseCase {
 	return &ProcessingVirtualQueueUseCase{
 		BuyersActivesGateway: b,
 		VirtualQueueGateway:  v,
+		Producer:             p,
 	}
 }
 
@@ -45,8 +54,10 @@ func (uc *ProcessingVirtualQueueUseCase) updateAndNotificationNextBuyersActives(
 			continue
 		}
 		uc.BuyersActivesGateway.Add(token)
-
-		fmt.Println("Usuário liberado para compra: " + token)
+		uc.Producer.Publish(NotificationPositionRabbitMQ{
+			Token:    token,
+			Position: 0,
+		})
 	}
 }
 
@@ -57,9 +68,11 @@ func (uc *ProcessingVirtualQueueUseCase) updateAndNotificationPositionVirtualQue
 		return
 	}
 
-	for position, token := range tokensInQueue {
-
-		message := fmt.Sprintf("Posição do usuário %s atualizada: %d", token, position+1)
-		fmt.Println(message)
+	for index, token := range tokensInQueue {
+		position := index + 1
+		uc.Producer.Publish(NotificationPositionRabbitMQ{
+			Token:    token,
+			Position: int64(position),
+		})
 	}
 }
