@@ -12,10 +12,46 @@ type Consumer struct {
 	QueueName  string
 }
 
-func NewConsumer(conn *amqp.Connection, queueName string) (*Consumer, error) {
+func NewConsumer(conn *amqp.Connection, queueName, exchange, exchangeKind string) (*Consumer, error) {
 	ch, err := conn.Channel()
 	if err != nil {
 		return nil, fmt.Errorf("falha ao abrir canal: %w", err)
+	}
+
+	err = ch.ExchangeDeclare(
+		exchange,
+		exchangeKind,
+		true,
+		false,
+		false,
+		false,
+		nil,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("falha ao declarar exchange: %w", err)
+	}
+
+	q, err := ch.QueueDeclare(
+		queueName,
+		false,
+		true,
+		true,
+		false,
+		nil,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("falha ao declarar fila: %w", err)
+	}
+
+	err = ch.QueueBind(
+		q.Name,
+		"",
+		exchange,
+		false,
+		nil,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("falha ao vincular fila à exchange: %w", err)
 	}
 
 	return &Consumer{

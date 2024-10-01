@@ -24,7 +24,7 @@ func main() {
 	}
 	defer rabbitmqConn.Close()
 
-	producer, err := rabbitmq.NewProducer(rabbitmqConn, "virtual_queue")
+	producer, err := rabbitmq.NewProducer(rabbitmqConn, "virtual_queue_exchange", "fanout")
 	if err != nil {
 		panic(fmt.Errorf("erro ao criar produtor rabbitmq: %w", err))
 	}

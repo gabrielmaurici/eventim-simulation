@@ -10,31 +10,32 @@ import (
 type Producer struct {
 	Connection *amqp.Connection
 	Channel    *amqp.Channel
-	QueueName  string
+	Exchange   string
 }
 
-func NewProducer(conn *amqp.Connection, queueName string) (*Producer, error) {
+func NewProducer(conn *amqp.Connection, exchange, exchangeKind string) (*Producer, error) {
 	ch, err := conn.Channel()
 	if err != nil {
 		return nil, fmt.Errorf("falha ao abrir canal: %w", err)
 	}
 
-	_, err = ch.QueueDeclare(
-		queueName, // name
-		true,      // durable
-		false,     // delete when unused
-		false,     // exclusive
-		false,     // no-wait
-		nil,       // arguments
+	err = ch.ExchangeDeclare(
+		exchange,
+		exchangeKind,
+		true,
+		false,
+		false,
+		false,
+		nil,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("falha ao declarar fila: %w", err)
+		return nil, fmt.Errorf("falha ao declarar exchange: %w", err)
 	}
 
 	return &Producer{
 		Connection: conn,
 		Channel:    ch,
-		QueueName:  queueName,
+		Exchange:   exchange,
 	}, nil
 }
 
@@ -45,17 +46,17 @@ func (p *Producer) Publish(msg interface{}) error {
 	}
 
 	err = p.Channel.Publish(
-		"",          // exchange
-		p.QueueName, // routing key
-		false,       // mandatory
-		false,       // immediate
+		p.Exchange,
+		"",
+		false,
+		false,
 		amqp.Publishing{
 			ContentType: "application/json",
 			Body:        body,
 		},
 	)
 	if err != nil {
-		return fmt.Errorf("failed to publish message: %w", err)
+		return fmt.Errorf("erro ao publicar mensagem: %w", err)
 	}
 
 	return nil

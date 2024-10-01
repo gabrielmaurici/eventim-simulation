@@ -2,7 +2,6 @@ package websocket
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"sync"
@@ -34,33 +33,32 @@ func NewWebSocketVirtualQueueHandler(msgChan chan []byte) *WebSocketVirtualQueue
 	}
 }
 
-func (h *WebSocketVirtualQueueHandler) NotifyPositionSocket(w http.ResponseWriter, r *http.Request) {
+func (s *WebSocketVirtualQueueHandler) NotifyPositionSocket(w http.ResponseWriter, r *http.Request) {
 	token := r.URL.Query().Get("token")
 	if token == "" {
 		http.Error(w, "Token não fornecido", http.StatusBadRequest)
 		return
 	}
 
-	conn, err := h.upgrader.Upgrade(w, r, nil)
+	conn, err := s.upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		http.Error(w, "Erro ao upgrade para WebSocket", http.StatusInternalServerError)
+		http.Error(w, "Erro ao usar upgrade para WebSocket", http.StatusInternalServerError)
 		return
 	}
 	defer conn.Close()
 
-	h.mu.Lock()
-	h.connections[token] = conn
-	h.mu.Unlock()
+	s.mu.Lock()
+	s.connections[token] = conn
+	s.mu.Unlock()
 
 	go func() {
 		defer func() {
-			h.mu.Lock()
-			delete(h.connections, token) // Remover conexão ao finalizar
-			h.mu.Unlock()
+			s.mu.Lock()
+			delete(s.connections, token)
+			s.mu.Unlock()
 		}()
 
-		for msg := range h.msgChan {
-			fmt.Println("chegou aqui")
+		for msg := range s.msgChan {
 			var message NotificationRabbitMQModel
 			if err := json.Unmarshal(msg, &message); err != nil {
 				log.Printf("Erro ao deserializar mensagem: %v", err)
@@ -73,27 +71,26 @@ func (h *WebSocketVirtualQueueHandler) NotifyPositionSocket(w http.ResponseWrite
 				continue
 			}
 
-			h.mu.Lock()
-			conn, exists := h.connections[message.Token]
-			h.mu.Unlock()
+			s.mu.Lock()
+			conn, exists := s.connections[message.Token]
+			s.mu.Unlock()
 
 			if exists {
 				if err := conn.WriteMessage(websocket.TextMessage, responseMsg); err != nil {
 					log.Printf("Erro ao enviar mensagem: %v", err)
 					conn.Close()
-					h.mu.Lock()
-					delete(h.connections, message.Token)
-					h.mu.Unlock()
+					s.mu.Lock()
+					delete(s.connections, message.Token)
+					s.mu.Unlock()
 				}
 			}
 		}
 	}()
 
-	// Loop para ler mensagens do cliente (opcional)
 	for {
 		_, _, err := conn.ReadMessage()
 		if err != nil {
-			break // Sai do loop se houver erro
+			break
 		}
 	}
 }

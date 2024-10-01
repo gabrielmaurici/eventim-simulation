@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/gabrielmaurici/eventim-simulation/internal/websocket"
@@ -17,20 +16,15 @@ func main() {
 	}
 	defer rabbitmqConn.Close()
 
-	consumer, err := rabbitmq.NewConsumer(rabbitmqConn, "virtual_queue")
+	consumer, err := rabbitmq.NewConsumer(rabbitmqConn, "", "virtual_queue_exchange", "fanout")
 	if err != nil {
 		panic(fmt.Errorf("erro ao criar consumer rabbitmq: %w", err))
 	}
-
 	msgChan := make(chan []byte)
 	go consumer.Consume(msgChan)
 
 	webSocketVirtualQueueHandler := websocket.NewWebSocketVirtualQueueHandler(msgChan)
-
 	http.HandleFunc("/ws/virtual-queue", webSocketVirtualQueueHandler.NotifyPositionSocket)
-
 	fmt.Println("Websocket is running!")
-	if err := http.ListenAndServe(":5001", nil); err != nil {
-		log.Fatalf("Erro ao iniciar o servidor: %v", err)
-	}
+	http.ListenAndServe(":5001", nil)
 }

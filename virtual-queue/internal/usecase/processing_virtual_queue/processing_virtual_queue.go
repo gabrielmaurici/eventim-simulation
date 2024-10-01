@@ -54,10 +54,13 @@ func (uc *ProcessingVirtualQueueUseCase) updateAndNotificationNextBuyersActives(
 			continue
 		}
 		uc.BuyersActivesGateway.Add(token)
-		uc.Producer.Publish(NotificationPositionRabbitMQ{
+		err = uc.Producer.Publish(NotificationPositionRabbitMQ{
 			Token:    token,
 			Position: 0,
 		})
+		if err != nil {
+			fmt.Println("erro ao publicar no rabbitmq: %w", err)
+		}
 	}
 }
 
