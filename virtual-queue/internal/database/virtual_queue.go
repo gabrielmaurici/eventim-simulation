@@ -1,23 +1,27 @@
 package database
 
 import (
-	"github.com/go-redis/redis"
+	"context"
+
+	"github.com/redis/go-redis/v9"
 )
 
 type VirtualQueueDb struct {
 	RedisDb *redis.Client
+	Context context.Context
 }
 
 const virtualQueueKey string = "virtual_queue_key"
 
-func NewVirtualQueueDb(r *redis.Client) *VirtualQueueDb {
+func NewVirtualQueueDb(r *redis.Client, ctx context.Context) *VirtualQueueDb {
 	return &VirtualQueueDb{
 		RedisDb: r,
+		Context: ctx,
 	}
 }
 
 func (db *VirtualQueueDb) Enqueue(token string) (position int64, err error) {
-	position, err = db.RedisDb.RPush(virtualQueueKey, token).Result()
+	position, err = db.RedisDb.RPush(db.Context, virtualQueueKey, token).Result()
 	if err != nil {
 		return 0, err
 	}
@@ -25,7 +29,7 @@ func (db *VirtualQueueDb) Enqueue(token string) (position int64, err error) {
 }
 
 func (db *VirtualQueueDb) Dequeue() (token string, err error) {
-	token, err = db.RedisDb.LPop(virtualQueueKey).Result()
+	token, err = db.RedisDb.LPop(db.Context, virtualQueueKey).Result()
 	if err != nil {
 		return "", err
 	}
@@ -33,7 +37,7 @@ func (db *VirtualQueueDb) Dequeue() (token string, err error) {
 }
 
 func (db *VirtualQueueDb) GetAll() (tokens []string, err error) {
-	tokens, err = db.RedisDb.LRange(virtualQueueKey, 0, -1).Result()
+	tokens, err = db.RedisDb.LRange(db.Context, virtualQueueKey, 0, -1).Result()
 	if err != nil {
 		return nil, err
 	}

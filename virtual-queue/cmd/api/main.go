@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
@@ -9,7 +10,7 @@ import (
 	"github.com/gabrielmaurici/eventim-simulation/internal/web"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/go-redis/redis"
+	"github.com/redis/go-redis/v9"
 )
 
 func main() {
@@ -19,8 +20,9 @@ func main() {
 		DB:       0,
 	})
 
-	buyersActivesDb := database.NewBuyersActivesDb(redisDb)
-	virtualQueueDb := database.NewVirtualQueueDb(redisDb)
+	ctx := context.Background()
+	buyersActivesDb := database.NewBuyersActivesDb(redisDb, ctx)
+	virtualQueueDb := database.NewVirtualQueueDb(redisDb, ctx)
 	entryQueueUsecase := entry_virtual_queue.NewEntryQueueUseCase(buyersActivesDb, virtualQueueDb)
 	webVirtualQueueHandler := web.NewWebVirtualQueueHandler(*entryQueueUsecase)
 
