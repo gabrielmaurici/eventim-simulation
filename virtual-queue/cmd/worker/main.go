@@ -34,7 +34,7 @@ func main() {
 	ctx := context.Background()
 	buyersActivesDb := database.NewBuyersActivesDb(redisDb, ctx)
 	virtualQueueDb := database.NewVirtualQueueDb(redisDb, ctx)
-	processingVirtualQueueUseCase := processing_virtual_queue.NewProcessingVirtualQueueUseCase(buyersActivesDb, virtualQueueDb, *producer)
+	processingVirtualQueueUseCase := processing_virtual_queue.NewProcessingVirtualQueueUseCase(buyersActivesDb, virtualQueueDb, producer)
 	processingVirtualQueueWorker := worker.NewProcessingVirtualQueueWorker(*processingVirtualQueueUseCase)
 	fmt.Println("Worker is running!")
 

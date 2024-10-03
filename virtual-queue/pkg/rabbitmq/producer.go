@@ -7,6 +7,10 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
+type ProducerInterface interface {
+	Publish(msg interface{}) error
+}
+
 type Producer struct {
 	Connection *amqp.Connection
 	Channel    *amqp.Channel

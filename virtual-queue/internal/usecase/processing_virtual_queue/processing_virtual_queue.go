@@ -15,7 +15,7 @@ type NotificationPositionRabbitMQ struct {
 type ProcessingVirtualQueueUseCase struct {
 	BuyersActivesGateway gateway.BuyersActivesGateway
 	VirtualQueueGateway  gateway.VirtualQueueGateway
-	Producer             rabbitmq.Producer
+	Producer             rabbitmq.ProducerInterface
 }
 
 const MaxBuyersActivesCapacity = 5
@@ -23,7 +23,7 @@ const MaxBuyersActivesCapacity = 5
 func NewProcessingVirtualQueueUseCase(
 	b gateway.BuyersActivesGateway,
 	v gateway.VirtualQueueGateway,
-	p rabbitmq.Producer) *ProcessingVirtualQueueUseCase {
+	p rabbitmq.ProducerInterface) *ProcessingVirtualQueueUseCase {
 	return &ProcessingVirtualQueueUseCase{
 		BuyersActivesGateway: b,
 		VirtualQueueGateway:  v,
