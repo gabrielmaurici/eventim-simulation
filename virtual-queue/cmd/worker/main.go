@@ -13,14 +13,13 @@ import (
 )
 
 func main() {
-
 	redisDb := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
+		Addr:     "redis-virtual-queue:6379",
 		Password: "",
 		DB:       0,
 	})
 
-	rabbitmqConn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+	rabbitmqConn, err := amqp.Dial("amqp://guest:guest@rabbitmq-virtual-queue:5672/")
 	if err != nil {
 		panic(fmt.Errorf("erro ao conectar rabbitmq: %w", err))
 	}

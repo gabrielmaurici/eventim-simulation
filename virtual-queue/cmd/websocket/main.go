@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	rabbitmqConn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+	rabbitmqConn, err := amqp.Dial("amqp://guest:guest@rabbitmq-virtual-queue:5672/")
 	if err != nil {
 		panic(fmt.Errorf("erro ao conectar rabbitmq: %w", err))
 	}

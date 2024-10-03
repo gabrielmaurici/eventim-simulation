@@ -16,3 +16,45 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
+
+  api-virtual-queue: 
+    build: 
+      dockerfile: ./virtual-queue/Dockerfile.api
+    platform: linux/amd64
+    command: >
+      dockerize -wait tcp://redis-virtual-queue:6379 -wait tcp://rabbitmq-virtual-queue:5672 -timeout 40s
+      go run ./cmd/api/main.go
+    volumes:
+      - ./virtual-queue:/app
+    ports:
+      - 3000:3000
+    depends_on:
+      - redis-virtual-queue
+      - rabbitmq-virtual-queue
+  
+  websocket-virtual-queue: 
+    build: 
+      dockerfile: ./virtual-queue/Dockerfile.websocket
+    platform: linux/amd64
+    command: >
+      dockerize -wait tcp://rabbitmq-virtual-queue:5672 -timeout 40s
+      go run ./cmd/websocket/main.go
+    volumes:
+      - ./virtual-queue:/app
+    ports:
+      - 5001:5001
+    depends_on:
+      - rabbitmq-virtual-queue
+
+  worker-virtual-queue: 
+    build:
+      dockerfile: ./virtual-queue/Dockerfile.worker
+    platform: linux/amd64
+    command: >
+      dockerize -wait tcp://redis-virtual-queue:6379 -wait tcp://rabbitmq-virtual-queue:5672 -timeout 40s
+      go run ./cmd/worker/main.go
+    volumes:
+      - ./virtual-queue:/app
+    depends_on:
+      - redis-virtual-queue
+      - rabbitmq-virtual-queue
