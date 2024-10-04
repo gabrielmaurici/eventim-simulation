@@ -26,12 +26,14 @@ services:
       go run ./cmd/api/main.go
     volumes:
       - ./virtual-queue:/app
-    ports:
-      - 3000:3000
+    # ports:
+    #   - 3000:3000
+    deploy:
+      replicas: 2
     depends_on:
       - redis-virtual-queue
       - rabbitmq-virtual-queue
-  
+
   websocket-virtual-queue: 
     build: 
       dockerfile: ./virtual-queue/Dockerfile.websocket
@@ -41,8 +43,10 @@ services:
       go run ./cmd/websocket/main.go
     volumes:
       - ./virtual-queue:/app
-    ports:
-      - 5001:5001
+    # ports:
+    #   - 5001:5001
+    deploy:
+      replicas: 2
     depends_on:
       - rabbitmq-virtual-queue
 
@@ -58,3 +62,13 @@ services:
     depends_on:
       - redis-virtual-queue
       - rabbitmq-virtual-queue
+
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - "80:80"
+    depends_on:
+      - api-virtual-queue
+      - websocket-virtual-queue
