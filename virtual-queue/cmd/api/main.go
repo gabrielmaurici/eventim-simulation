@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/gabrielmaurici/eventim-simulation/internal/database"
-	"github.com/gabrielmaurici/eventim-simulation/internal/usecase/entry_virtual_queue"
-	"github.com/gabrielmaurici/eventim-simulation/internal/web"
+	"github.com/gabrielmaurici/eventim-simulation/virtual-queue/internal/database"
+	"github.com/gabrielmaurici/eventim-simulation/virtual-queue/internal/usecase/entry_virtual_queue"
+	"github.com/gabrielmaurici/eventim-simulation/virtual-queue/internal/web"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/redis/go-redis/v9"

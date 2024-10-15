@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/gabrielmaurici/eventim-simulation/internal/usecase/entry_virtual_queue"
+	"github.com/gabrielmaurici/eventim-simulation/virtual-queue/internal/usecase/entry_virtual_queue"
 )
 
 type WebVirtualQueueHandler struct {

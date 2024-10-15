@@ -1,4 +1,4 @@
-module github.com/gabrielmaurici/eventim-simulation
+module github.com/gabrielmaurici/eventim-simulation/virtual-queue
 
 go 1.23.1
 

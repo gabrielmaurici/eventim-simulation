@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/gabrielmaurici/eventim-simulation/internal/usecase/processing_virtual_queue"
+	"github.com/gabrielmaurici/eventim-simulation/virtual-queue/internal/usecase/processing_virtual_queue"
 )
 
 type ProcessingVirtualQueueWorker struct {

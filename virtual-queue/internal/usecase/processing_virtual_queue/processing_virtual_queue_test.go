@@ -3,7 +3,7 @@ package processing_virtual_queue
 import (
 	"testing"
 
-	"github.com/gabrielmaurici/eventim-simulation/internal/usecase/mocks"
+	"github.com/gabrielmaurici/eventim-simulation/virtual-queue/internal/usecase/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )

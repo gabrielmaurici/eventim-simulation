@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/gabrielmaurici/eventim-simulation/internal/websocket"
-	"github.com/gabrielmaurici/eventim-simulation/pkg/rabbitmq"
+	"github.com/gabrielmaurici/eventim-simulation/virtual-queue/internal/websocket"
+	"github.com/gabrielmaurici/eventim-simulation/virtual-queue/pkg/rabbitmq"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 

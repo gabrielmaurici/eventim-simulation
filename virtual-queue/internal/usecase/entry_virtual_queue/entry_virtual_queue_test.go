@@ -3,8 +3,8 @@ package entry_virtual_queue
 import (
 	"testing"
 
-	"github.com/gabrielmaurici/eventim-simulation/internal/usecase/mocks"
-	"github.com/gabrielmaurici/eventim-simulation/pkg/token"
+	"github.com/gabrielmaurici/eventim-simulation/virtual-queue/internal/usecase/mocks"
+	"github.com/gabrielmaurici/eventim-simulation/virtual-queue/pkg/token"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )

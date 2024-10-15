@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/gabrielmaurici/eventim-simulation/internal/database"
-	"github.com/gabrielmaurici/eventim-simulation/internal/usecase/processing_virtual_queue"
-	"github.com/gabrielmaurici/eventim-simulation/internal/worker"
-	"github.com/gabrielmaurici/eventim-simulation/pkg/rabbitmq"
+	"github.com/gabrielmaurici/eventim-simulation/virtual-queue/internal/database"
+	"github.com/gabrielmaurici/eventim-simulation/virtual-queue/internal/usecase/processing_virtual_queue"
+	"github.com/gabrielmaurici/eventim-simulation/virtual-queue/internal/worker"
+	"github.com/gabrielmaurici/eventim-simulation/virtual-queue/pkg/rabbitmq"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/redis/go-redis/v9"
 )

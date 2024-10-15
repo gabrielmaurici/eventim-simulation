@@ -3,8 +3,8 @@ package processing_virtual_queue
 import (
 	"fmt"
 
-	"github.com/gabrielmaurici/eventim-simulation/internal/gateway"
-	"github.com/gabrielmaurici/eventim-simulation/pkg/rabbitmq"
+	"github.com/gabrielmaurici/eventim-simulation/virtual-queue/internal/gateway"
+	"github.com/gabrielmaurici/eventim-simulation/virtual-queue/pkg/rabbitmq"
 )
 
 type NotificationPositionRabbitMQ struct {
