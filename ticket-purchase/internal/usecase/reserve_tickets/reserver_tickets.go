@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/gabrielmaurici/eventim-simulation/ticket-purchase/internal/gateway"
 )
@@ -28,6 +29,11 @@ func NewReserveTickets(tg gateway.TicketGateway, trg gateway.TicketReservationGa
 }
 
 func (uc *ReserveTicketsUseCase) Execute(input ReserveTicketsInputUseCaseDTO) (output []ReserveTicketsOutputUseCaseDTO, err error) {
+	err = inputValidation(input)
+	if err != nil {
+		return nil, err
+	}
+
 	tickets, err := uc.TicketGateway.GetAvailableTickets(input.Quantity)
 	if err != nil {
 		return nil, err
@@ -56,4 +62,21 @@ func (uc *ReserveTicketsUseCase) Execute(input ReserveTicketsInputUseCaseDTO) (o
 	}
 
 	return output, nil
+}
+
+func inputValidation(input ReserveTicketsInputUseCaseDTO) error {
+	var errs []string
+	if input.Quantity <= 0 {
+		errs = append(errs, "quantidade de ingressos inválida")
+	}
+
+	if input.UserToken == "" {
+		errs = append(errs, "token de usuário inválido")
+	}
+
+	if len(errs) > 0 {
+		return fmt.Errorf("falha ao reservar ingressos: %v", errs)
+	}
+
+	return nil
 }
