@@ -3,32 +3,33 @@ package usecase
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/gabrielmaurici/eventim-simulation/ticket-purchase/internal/gateway"
 )
 
-type ReserveTicketsInputUseCaseDTO struct {
+type ReserverTicketsInputUseCaseDTO struct {
 	UserToken string `json:"user_token"`
 	Quantity  int8   `json:"quantity"`
 }
 
-type ReserveTicketsOutputUseCaseDTO struct {
+type ReserverTicketsOutputUseCaseDTO struct {
 	TicketId string `json:"ticket_id"`
 }
 
-type ReserveTicketsUseCase struct {
+type ReserverTicketsUseCase struct {
 	TicketGateway            gateway.TicketGateway
 	TicketReservationGateway gateway.TicketReservationGateway
 }
 
-func NewReserveTickets(tg gateway.TicketGateway, trg gateway.TicketReservationGateway) *ReserveTicketsUseCase {
-	return &ReserveTicketsUseCase{
+func NewReserverTickets(tg gateway.TicketGateway, trg gateway.TicketReservationGateway) *ReserverTicketsUseCase {
+	return &ReserverTicketsUseCase{
 		TicketGateway:            tg,
 		TicketReservationGateway: trg,
 	}
 }
 
-func (uc *ReserveTicketsUseCase) Execute(input ReserveTicketsInputUseCaseDTO) (output []ReserveTicketsOutputUseCaseDTO, err error) {
+func (uc *ReserverTicketsUseCase) Execute(input ReserverTicketsInputUseCaseDTO) (output []ReserverTicketsOutputUseCaseDTO, err error) {
 	err = inputValidation(input)
 	if err != nil {
 		return nil, err
@@ -55,7 +56,7 @@ func (uc *ReserveTicketsUseCase) Execute(input ReserveTicketsInputUseCaseDTO) (o
 			return nil, err
 		}
 
-		ticketDto := ReserveTicketsOutputUseCaseDTO{
+		ticketDto := ReserverTicketsOutputUseCaseDTO{
 			TicketId: ticket.Id,
 		}
 		output = append(output, ticketDto)
@@ -64,10 +65,10 @@ func (uc *ReserveTicketsUseCase) Execute(input ReserveTicketsInputUseCaseDTO) (o
 	return output, nil
 }
 
-func inputValidation(input ReserveTicketsInputUseCaseDTO) error {
+func inputValidation(input ReserverTicketsInputUseCaseDTO) error {
 	var errs []string
 	if input.Quantity <= 0 {
-		errs = append(errs, "quantidade de ingressos inválida")
+		errs = append(errs, "quantidade de ingressos inválido")
 	}
 
 	if input.UserToken == "" {
@@ -75,7 +76,7 @@ func inputValidation(input ReserveTicketsInputUseCaseDTO) error {
 	}
 
 	if len(errs) > 0 {
-		return fmt.Errorf("falha ao reservar ingressos: %v", errs)
+		return fmt.Errorf("falha ao reservar ingressos: %v", strings.Join(errs, ". "))
 	}
 
 	return nil
