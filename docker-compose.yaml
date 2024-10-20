@@ -2,7 +2,7 @@ version: '3.9'
 
 services:
   redis-virtual-queue:
-    image: redis:latest
+    image: redis:8.0-M01
     container_name: redis-local
     ports:
       - "6379:6379"
@@ -20,7 +20,6 @@ services:
   api-virtual-queue: 
     build: 
       dockerfile: ./virtual-queue/Dockerfile.api
-    platform: linux/amd64
     command: >
       dockerize -wait tcp://redis-virtual-queue:6379 -wait tcp://rabbitmq-virtual-queue:5672 -timeout 40s
       go run ./cmd/api/main.go
@@ -37,7 +36,6 @@ services:
   websocket-virtual-queue: 
     build: 
       dockerfile: ./virtual-queue/Dockerfile.websocket
-    platform: linux/amd64
     command: >
       dockerize -wait tcp://rabbitmq-virtual-queue:5672 -timeout 40s
       go run ./cmd/websocket/main.go
@@ -53,7 +51,6 @@ services:
   worker-virtual-queue: 
     build:
       dockerfile: ./virtual-queue/Dockerfile.worker
-    platform: linux/amd64
     command: >
       dockerize -wait tcp://redis-virtual-queue:6379 -wait tcp://rabbitmq-virtual-queue:5672 -timeout 40s
       go run ./cmd/worker/main.go
@@ -64,7 +61,7 @@ services:
       - rabbitmq-virtual-queue
 
   nginx:
-    image: nginx:latest
+    image: nginx:1.27.2
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
     ports:
@@ -72,3 +69,35 @@ services:
     depends_on:
       - api-virtual-queue
       - websocket-virtual-queue
+
+  redis-ticket-purchase:
+    image: redis:8.0-M01
+    container_name: redis-local-2
+    ports:
+      - "6380:6379"
+
+  mysql-ticket-purchase:
+    image: mysql:9.1.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: eventim
+      MYSQL_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./ticket-purchase/.docker/mysql:/var/lib/mysql
+      - ./ticket-purchase/sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  api-ticket-purchase: 
+    build: 
+      dockerfile: ./ticket-purchase/Dockerfile.api
+    command: >
+      dockerize -wait tcp://redis-virtual-queue:6379 -wait tcp://rabbitmq-virtual-queue:5672 -timeout 40s
+      go run ./cmd/api/main.go
+    volumes:
+      - ./ticket-purchase:/app
+    ports:
+      - 3001:3001
+    depends_on:
+      - redis-ticket-purchase
+      - mysql-ticket-purchase

@@ -1,0 +1,8 @@
+
+POST http://localhost/api/tickets/reserve HTTP/1.1
+Content-Type: application/json
+
+{
+    "user_token": "1",
+    "quantity": 1
+}

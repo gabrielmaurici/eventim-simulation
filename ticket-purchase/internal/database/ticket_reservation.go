@@ -12,7 +12,8 @@ type TicketReservationDb struct {
 }
 
 const expireTime time.Duration = 1 * time.Minute
-const ticketReservationKey string = "ticket_reservaiton:"
+const ticketReservationKey string = "ticket_reservation:"
+const listTicketsReservationKey string = "ticket_reservation:tickets:"
 
 func NewTicketReservationDb(db *redis.Client) *TicketReservationDb {
 	return &TicketReservationDb{
@@ -20,15 +21,41 @@ func NewTicketReservationDb(db *redis.Client) *TicketReservationDb {
 	}
 }
 
-func (trb *TicketReservationDb) Reserve(userToken string, ticketId string, ctx context.Context) error {
-	key := ticketReservationKey + userToken
+func (trb *TicketReservationDb) HasReservation(userToken string, ctx context.Context) (Has bool, err error) {
+	reservationKey := ticketReservationKey + userToken
+	reservation, err := trb.Db.HGetAll(ctx, reservationKey).Result()
+	if err != nil {
+		return false, err
+	}
+	if len(reservation) == 0 {
+		return false, nil
+	}
 
-	err := trb.Db.LPush(ctx, key, ticketId).Err()
+	return true, nil
+}
+
+func (trb *TicketReservationDb) CreateTicketReservation(userToken string, ctx context.Context) error {
+	reservationKey := ticketReservationKey + userToken
+	reservationFields := []string{
+		"teste", "teste1",
+		"dateReservation", time.Now().String(),
+	}
+	err := trb.Db.HSet(ctx, reservationKey, reservationFields).Err()
 	if err != nil {
 		return err
 	}
 
-	err = trb.Db.Expire(ctx, key, expireTime).Err()
+	errExpire := trb.Db.HExpire(ctx, reservationKey, expireTime, "dateReservation").Err()
+	if errExpire != nil {
+		return errExpire
+	}
+
+	return nil
+}
+
+func (trb *TicketReservationDb) RegisterTickets(userToken string, ticketsId []string, ctx context.Context) error {
+	ticketsReservationKey := listTicketsReservationKey + userToken
+	err := trb.Db.LPush(ctx, ticketsReservationKey, ticketsId).Err()
 	if err != nil {
 		return err
 	}
