@@ -13,7 +13,7 @@ type TicketReservationDb struct {
 
 const expireTime time.Duration = 1 * time.Minute
 const ticketReservationKey string = "ticket_reservation:"
-const listTicketsReservationKey string = "ticket_reservation:tickets:"
+const listTicketsReservationKey string = "ticket_reservation_tickets:"
 
 func NewTicketReservationDb(db *redis.Client) *TicketReservationDb {
 	return &TicketReservationDb{
@@ -21,31 +21,18 @@ func NewTicketReservationDb(db *redis.Client) *TicketReservationDb {
 	}
 }
 
-func (trb *TicketReservationDb) HasReservation(userToken string, ctx context.Context) (Has bool, err error) {
-	reservationKey := ticketReservationKey + userToken
-	reservation, err := trb.Db.HGetAll(ctx, reservationKey).Result()
-	if err != nil {
-		return false, err
-	}
-	if len(reservation) == 0 {
-		return false, nil
-	}
-
-	return true, nil
-}
-
 func (trb *TicketReservationDb) CreateTicketReservation(userToken string, ctx context.Context) error {
 	reservationKey := ticketReservationKey + userToken
 	reservationFields := []string{
-		"teste", "teste1",
-		"dateReservation", time.Now().String(),
+		"dateReservation", time.Now().Local().UTC().Format("02/01/2006 15:04:05"),
+		"expire", expireTime.String(),
 	}
 	err := trb.Db.HSet(ctx, reservationKey, reservationFields).Err()
 	if err != nil {
 		return err
 	}
 
-	errExpire := trb.Db.HExpire(ctx, reservationKey, expireTime, "dateReservation").Err()
+	errExpire := trb.Db.HExpire(ctx, reservationKey, expireTime, "expire").Err()
 	if errExpire != nil {
 		return errExpire
 	}
@@ -58,6 +45,27 @@ func (trb *TicketReservationDb) RegisterTickets(userToken string, ticketsId []st
 	err := trb.Db.LPush(ctx, ticketsReservationKey, ticketsId).Err()
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (trb *TicketReservationDb) DeleteExpiredReservations(ctx context.Context) error {
+	reservationKey := ticketReservationKey + "*"
+	keys, err := trb.Db.Keys(ctx, reservationKey).Result()
+	if err != nil {
+		return err
+	}
+
+	for _, key := range keys {
+		expireField, err := trb.Db.HExists(ctx, key, "expire").Result()
+		if err != nil {
+			continue
+		}
+
+		if !expireField {
+			trb.Db.Del(ctx, key)
+		}
 	}
 
 	return nil

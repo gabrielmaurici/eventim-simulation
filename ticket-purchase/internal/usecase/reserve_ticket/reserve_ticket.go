@@ -38,15 +38,9 @@ func (uc *ReserveTicketUseCase) Execute(input ReserveTicketInputUseCaseDTO, ctx 
 		return err
 	}
 
-	reservation, err := uc.TicketReservationGateway.HasReservation(input.UserToken, ctx)
+	err = uc.TicketReservationGateway.CreateTicketReservation(input.UserToken, ctx)
 	if err != nil {
-		return fmt.Errorf("erro ao verificar se já possui reserva. %w", err)
-	}
-
-	if !reservation {
-		if err = uc.TicketReservationGateway.CreateTicketReservation(input.UserToken, ctx); err != nil {
-			return fmt.Errorf("erro ao gerar registro da reserva. %w", err)
-		}
+		return fmt.Errorf("erro ao gerar registro da reserva. %w", err)
 	}
 
 	var ticketsIds []string
