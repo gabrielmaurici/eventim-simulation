@@ -25,8 +25,6 @@ services:
       go run ./cmd/api/main.go
     volumes:
       - ./virtual-queue:/app
-    # ports:
-    #   - 3000:3000
     deploy:
       replicas: 2
     depends_on:
@@ -41,8 +39,6 @@ services:
       go run ./cmd/websocket/main.go
     volumes:
       - ./virtual-queue:/app
-    # ports:
-    #   - 5001:5001
     deploy:
       replicas: 2
     depends_on:
@@ -92,7 +88,7 @@ services:
     build: 
       dockerfile: ./ticket-purchase/Dockerfile.api
     command: >
-      dockerize -wait tcp://redis-virtual-queue:6379 -wait tcp://rabbitmq-virtual-queue:5672 -timeout 40s
+      dockerize -wait tcp://redis-ticket-purchase:6379 -wait tcp://mysql-ticket-purchase:3306 -timeout 40s
       go run ./cmd/api/main.go
     volumes:
       - ./ticket-purchase:/app
@@ -101,3 +97,15 @@ services:
     depends_on:
       - redis-ticket-purchase
       - mysql-ticket-purchase
+
+  worker-ticket-purchase: 
+    build:
+      dockerfile: ./ticket-purchase/Dockerfile.worker
+    command: >
+     dockerize -wait tcp://redis-ticket-purchase:6379 -wait tcp://mysql-ticket-purchase:3306 -timeout 40s
+      go run ./cmd/worker/main.go
+    volumes:
+      - ./ticket-purchase:/app
+    depends_on:
+      - redis-ticket-purchase
+      - mysql-ticket-purchase      

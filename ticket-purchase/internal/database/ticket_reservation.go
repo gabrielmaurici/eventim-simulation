@@ -52,6 +52,7 @@ func (trb *TicketReservationDb) RegisterTickets(userToken string, ticketsId []st
 }
 
 func (trb *TicketReservationDb) GetAndDeleteExpiredTickets(ctx context.Context) (expiredTickets *[]string, err error) {
+	expiredTickets = &[]string{}
 	reservationKey := ticketReservationKey + "*"
 	reservations, err := trb.Db.Keys(ctx, reservationKey).Result()
 	if err != nil {
@@ -74,7 +75,6 @@ func (trb *TicketReservationDb) GetAndDeleteExpiredTickets(ctx context.Context) 
 			continue
 		}
 		if len(expiredTicketsUser) > 0 {
-			expiredTickets = &[]string{}
 			*expiredTickets = append(*expiredTickets, expiredTicketsUser...)
 		}
 

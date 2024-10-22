@@ -29,5 +29,6 @@ func main() {
 	processingExpiredTicketsUseCase := processing_expired_tickets.NewProcessingExpiredTicketsUseCase(ticketDb, ticketReservationDb)
 	processingExpiredTicketsWorker := worker.NewProcessingExpiredTicketsWorker(*processingExpiredTicketsUseCase)
 	fmt.Println("Worker is running!")
+
 	processingExpiredTicketsWorker.Start()
 }
