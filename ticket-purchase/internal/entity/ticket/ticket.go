@@ -15,3 +15,7 @@ func NewTicket(id string, available bool) *Ticket {
 func (t *Ticket) UpdateToUnavailable() {
 	t.Available = false
 }
+
+func (t *Ticket) UpdateToAvailable() {
+	t.Available = true
+}

@@ -26,3 +26,14 @@ func Test_WhenUpdateToUnavailable_FieldAvaiableReturnsFalse(t *testing.T) {
 	assert.Equal(t, id, ticket.Id)
 	assert.False(t, ticket.Available)
 }
+
+func Test_WhenUpdateToAvailable_FieldAvaiableReturnsTrue(t *testing.T) {
+	id := "123"
+	available := false
+
+	ticket := NewTicket(id, available)
+	ticket.UpdateToAvailable()
+
+	assert.Equal(t, id, ticket.Id)
+	assert.True(t, ticket.Available)
+}

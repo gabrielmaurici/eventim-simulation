@@ -9,6 +9,11 @@ type TicketGatewayMock struct {
 	mock.Mock
 }
 
+func (m *TicketGatewayMock) Get(id string) (*entity.Ticket, error) {
+	args := m.Called(id)
+	return args.Get(0).(*entity.Ticket), args.Error(1)
+}
+
 func (m *TicketGatewayMock) GetAvailableTickets(quantity int8) (*[]entity.Ticket, error) {
 	args := m.Called(quantity)
 	return args.Get(0).(*[]entity.Ticket), args.Error(1)

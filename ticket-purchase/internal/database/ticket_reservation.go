@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -50,23 +51,34 @@ func (trb *TicketReservationDb) RegisterTickets(userToken string, ticketsId []st
 	return nil
 }
 
-func (trb *TicketReservationDb) DeleteExpiredReservations(ctx context.Context) error {
+func (trb *TicketReservationDb) GetAndDeleteExpiredTickets(ctx context.Context) (expiredTickets []string, err error) {
 	reservationKey := ticketReservationKey + "*"
-	keys, err := trb.Db.Keys(ctx, reservationKey).Result()
+	reservations, err := trb.Db.Keys(ctx, reservationKey).Result()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	for _, key := range keys {
+	for _, key := range reservations {
 		expireField, err := trb.Db.HExists(ctx, key, "expire").Result()
 		if err != nil {
 			continue
 		}
-
-		if !expireField {
-			trb.Db.Del(ctx, key)
+		if expireField {
+			continue
 		}
+
+		userToken := strings.Split(key, ":")[1]
+		ticketsReservationKey := listTicketsReservationKey + userToken
+		expiredTicketsUser, err := trb.Db.LRange(ctx, ticketsReservationKey, 0, -1).Result()
+		if err != nil {
+			continue
+		}
+		if len(expiredTicketsUser) > 0 {
+			expiredTickets = append(expiredTickets, expiredTicketsUser...)
+		}
+
+		trb.Db.Del(ctx, key, ticketsReservationKey)
 	}
 
-	return nil
+	return expiredTickets, nil
 }

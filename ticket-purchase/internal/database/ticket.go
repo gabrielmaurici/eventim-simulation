@@ -2,7 +2,6 @@ package database
 
 import (
 	"database/sql"
-	"fmt"
 
 	entity "github.com/gabrielmaurici/eventim-simulation/ticket-purchase/internal/entity/ticket"
 )
@@ -17,6 +16,16 @@ func NewTicketDb(db *sql.DB) *TicketDb {
 	}
 }
 
+func (t *TicketDb) Get(id string) (*entity.Ticket, error) {
+	var ticket entity.Ticket
+	err := t.Db.QueryRow("SELECT id, available FROM tickets WHERE id = ?", id).Scan(&ticket.Id, &ticket.Available)
+	if err != nil {
+		return nil, err
+	}
+
+	return &ticket, nil
+}
+
 func (t *TicketDb) GetAvailableTickets(quantity int8) (*[]entity.Ticket, error) {
 	rows, err := t.Db.Query("SELECT id, available FROM tickets WHERE available = TRUE LIMIT ?", quantity)
 	if err != nil {
@@ -28,7 +37,7 @@ func (t *TicketDb) GetAvailableTickets(quantity int8) (*[]entity.Ticket, error) 
 	for rows.Next() {
 		var ticket entity.Ticket
 		if err := rows.Scan(&ticket.Id, &ticket.Available); err != nil {
-			return nil, fmt.Errorf("erro ao ler dados do ingresso: %v", err)
+			return nil, err
 		}
 		tickets = append(tickets, ticket)
 	}
@@ -39,13 +48,13 @@ func (t *TicketDb) GetAvailableTickets(quantity int8) (*[]entity.Ticket, error) 
 func (t *TicketDb) Update(ticket *entity.Ticket) error {
 	stmt, err := t.Db.Prepare("UPDATE tickets SET available = ? WHERE id = ?")
 	if err != nil {
-		return fmt.Errorf("erro ao preparar query de update: %v", err)
+		return err
 	}
 	defer stmt.Close()
 
 	_, err = stmt.Exec(ticket.Available, ticket.Id)
 	if err != nil {
-		return fmt.Errorf("erro ao executar update do ingresso: %v", err)
+		return err
 	}
 
 	return nil
