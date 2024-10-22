@@ -24,14 +24,14 @@ func NewProcessingExpiredTicketsUseCase(
 func (uc *ProcessingExpiredTicketsUseCase) Execute(ctx context.Context) error {
 	expiredTickets, err := uc.TicketReservationGateway.GetAndDeleteExpiredTickets(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("erro ao obter e deletar ingressos expirados: %w", err)
 	}
 
-	if len(expiredTickets) <= 0 {
+	if len(*expiredTickets) <= 0 {
 		return nil
 	}
 
-	for _, ticket := range expiredTickets {
+	for _, ticket := range *expiredTickets {
 		ticket, err := uc.TicketGateway.Get(ticket)
 		if err != nil {
 			fmt.Println("erro ao obter ingresso: %w", err)

@@ -20,7 +20,7 @@ func (m *TicketReservationGatewayMock) RegisterTickets(userToken string, tickets
 	return args.Error(0)
 }
 
-func (m *TicketReservationGatewayMock) GetAndDeleteExpiredTickets(ctx context.Context) (expiredTickets []string, err error) {
+func (m *TicketReservationGatewayMock) GetAndDeleteExpiredTickets(ctx context.Context) (expiredTickets *[]string, err error) {
 	args := m.Called(ctx)
-	return args.Get(0).([]string), args.Error(1)
+	return args.Get(0).(*[]string), args.Error(1)
 }
