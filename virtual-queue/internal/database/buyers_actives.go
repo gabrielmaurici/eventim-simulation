@@ -10,35 +10,33 @@ import (
 
 type BuyersActivesDb struct {
 	RedisDb *redis.Client
-	Context context.Context
 }
 
 const buyersActivesCountKey string = "buyers_actives_count_key"
 
-func NewBuyersActivesDb(r *redis.Client, ctx context.Context) *BuyersActivesDb {
+func NewBuyersActivesDb(r *redis.Client) *BuyersActivesDb {
 	return &BuyersActivesDb{
 		RedisDb: r,
-		Context: ctx,
 	}
 }
 
-func (db *BuyersActivesDb) GetBuyersActives() (total int64, err error) {
+func (db *BuyersActivesDb) GetBuyersActives(ctx context.Context) (total int64, err error) {
 	expiration := fmt.Sprintf("%d", time.Now().Unix())
-	_, err = db.RedisDb.ZRemRangeByScore(db.Context, buyersActivesCountKey, "-inf", expiration).Result()
+	_, err = db.RedisDb.ZRemRangeByScore(ctx, buyersActivesCountKey, "-inf", expiration).Result()
 	if err != nil {
 		return 0, err
 	}
 
-	total, err = db.RedisDb.ZCount(db.Context, buyersActivesCountKey, expiration, "+inf").Result()
+	total, err = db.RedisDb.ZCount(ctx, buyersActivesCountKey, expiration, "+inf").Result()
 	if err != nil {
 		return 0, err
 	}
 	return total, nil
 }
 
-func (db *BuyersActivesDb) Add(token string) error {
+func (db *BuyersActivesDb) Add(token string, ctx context.Context) error {
 	expiration := time.Now().Add(30 * time.Second).Unix()
-	err := db.RedisDb.ZAdd(db.Context, buyersActivesCountKey, redis.Z{
+	err := db.RedisDb.ZAdd(ctx, buyersActivesCountKey, redis.Z{
 		Score:  float64(expiration),
 		Member: token,
 	}).Err()

@@ -1,6 +1,7 @@
 package web
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 
@@ -18,7 +19,8 @@ func NewWebVirtualQueueHandler(uc entry_virtual_queue.EntryVirtualQueueUseCase) 
 }
 
 func (h *WebVirtualQueueHandler) EntryQueue(w http.ResponseWriter, r *http.Request) {
-	output, err := h.EntryVirtualQueueUseCase.Execute()
+	ctx := context.Background()
+	output, err := h.EntryVirtualQueueUseCase.Execute(ctx)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))

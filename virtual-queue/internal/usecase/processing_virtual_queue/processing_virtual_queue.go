@@ -1,6 +1,7 @@
 package processing_virtual_queue
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/gabrielmaurici/eventim-simulation/virtual-queue/internal/gateway"
@@ -31,8 +32,8 @@ func NewProcessingVirtualQueueUseCase(
 	}
 }
 
-func (uc *ProcessingVirtualQueueUseCase) Execute() {
-	totalBuyersActives, err := uc.BuyersActivesGateway.GetBuyersActives()
+func (uc *ProcessingVirtualQueueUseCase) Execute(ctx context.Context) {
+	totalBuyersActives, err := uc.BuyersActivesGateway.GetBuyersActives(ctx)
 	if err != nil {
 		fmt.Println("erro ao obter compradores ativos: %w", err)
 	}
@@ -42,18 +43,18 @@ func (uc *ProcessingVirtualQueueUseCase) Execute() {
 	}
 
 	quantityNextBuyersActives := MaxBuyersActivesCapacity - totalBuyersActives
-	uc.updateAndNotificationNextBuyersActives(int(quantityNextBuyersActives))
-	uc.updateAndNotificationPositionVirtualQueue()
+	uc.updateAndNotificationNextBuyersActives(int(quantityNextBuyersActives), ctx)
+	uc.updateAndNotificationPositionVirtualQueue(ctx)
 }
 
-func (uc *ProcessingVirtualQueueUseCase) updateAndNotificationNextBuyersActives(quantityNextBuyersActives int) {
+func (uc *ProcessingVirtualQueueUseCase) updateAndNotificationNextBuyersActives(quantityNextBuyersActives int, ctx context.Context) {
 	for i := 0; i < quantityNextBuyersActives; i++ {
-		token, err := uc.VirtualQueueGateway.Dequeue()
+		token, err := uc.VirtualQueueGateway.Dequeue(ctx)
 		if err != nil {
 			fmt.Println("erro ao remover token da fila: %w", err)
 			continue
 		}
-		uc.BuyersActivesGateway.Add(token)
+		uc.BuyersActivesGateway.Add(token, ctx)
 		err = uc.Producer.Publish(NotificationPositionRabbitMQ{
 			Token:    token,
 			Position: 0,
@@ -64,8 +65,8 @@ func (uc *ProcessingVirtualQueueUseCase) updateAndNotificationNextBuyersActives(
 	}
 }
 
-func (uc *ProcessingVirtualQueueUseCase) updateAndNotificationPositionVirtualQueue() {
-	tokensInQueue, err := uc.VirtualQueueGateway.GetAll()
+func (uc *ProcessingVirtualQueueUseCase) updateAndNotificationPositionVirtualQueue(ctx context.Context) {
+	tokensInQueue, err := uc.VirtualQueueGateway.GetAll(ctx)
 	if err != nil {
 		fmt.Println("erro ao obter tokens da fila: %w", err)
 		return

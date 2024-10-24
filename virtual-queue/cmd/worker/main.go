@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/gabrielmaurici/eventim-simulation/virtual-queue/internal/database"
@@ -30,9 +29,8 @@ func main() {
 		panic(fmt.Errorf("erro ao criar produtor rabbitmq: %w", err))
 	}
 
-	ctx := context.Background()
-	buyersActivesDb := database.NewBuyersActivesDb(redisDb, ctx)
-	virtualQueueDb := database.NewVirtualQueueDb(redisDb, ctx)
+	buyersActivesDb := database.NewBuyersActivesDb(redisDb)
+	virtualQueueDb := database.NewVirtualQueueDb(redisDb)
 	processingVirtualQueueUseCase := processing_virtual_queue.NewProcessingVirtualQueueUseCase(buyersActivesDb, virtualQueueDb, producer)
 	processingVirtualQueueWorker := worker.NewProcessingVirtualQueueWorker(*processingVirtualQueueUseCase)
 	fmt.Println("Worker is running!")

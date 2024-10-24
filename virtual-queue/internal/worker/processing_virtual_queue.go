@@ -1,6 +1,7 @@
 package worker
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -19,7 +20,8 @@ func NewProcessingVirtualQueueWorker(uc processing_virtual_queue.ProcessingVirtu
 
 func (w *ProcessingVirtualQueueWorker) Start() {
 	for {
-		w.ProcessingVirtualQueueUseCase.Execute()
+		ctx := context.Background()
+		w.ProcessingVirtualQueueUseCase.Execute(ctx)
 		fmt.Println("Fila virtual processada")
 		time.Sleep(5 * time.Second)
 	}

@@ -1,6 +1,8 @@
 package gateway
 
+import "context"
+
 type BuyersActivesGateway interface {
-	GetBuyersActives() (total int64, err error)
-	Add(token string) (err error)
+	GetBuyersActives(ctx context.Context) (total int64, err error)
+	Add(token string, ctx context.Context) (err error)
 }

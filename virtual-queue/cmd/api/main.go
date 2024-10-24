@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 
@@ -20,9 +19,8 @@ func main() {
 		DB:       0,
 	})
 
-	ctx := context.Background()
-	buyersActivesDb := database.NewBuyersActivesDb(redisDb, ctx)
-	virtualQueueDb := database.NewVirtualQueueDb(redisDb, ctx)
+	buyersActivesDb := database.NewBuyersActivesDb(redisDb)
+	virtualQueueDb := database.NewVirtualQueueDb(redisDb)
 	entryQueueUsecase := entry_virtual_queue.NewEntryQueueUseCase(buyersActivesDb, virtualQueueDb)
 	webVirtualQueueHandler := web.NewWebVirtualQueueHandler(*entryQueueUsecase)
 

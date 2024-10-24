@@ -1,6 +1,7 @@
 package processing_virtual_queue
 
 import (
+	"context"
 	"testing"
 
 	"github.com/gabrielmaurici/eventim-simulation/virtual-queue/internal/usecase/mocks"
@@ -12,10 +13,10 @@ func Test_WhenActiveBuyersCapacityIsAvailable_Execute_NotifyWebsocket(t *testing
 	buyersActivesMock := &mocks.BuyersActivesGatewayMock{}
 	virtualQueueMock := &mocks.VirtualQueueGatewayMock{}
 	producerMock := &mocks.ProducerMock{}
-	buyersActivesMock.On("GetBuyersActives").Return(2, nil)
-	buyersActivesMock.On("Add", "some-token").Return(nil)
-	virtualQueueMock.On("Dequeue").Return("some-token", nil)
-	virtualQueueMock.On("GetAll").Return([]string{"some-token1", "some-token-2"}, nil)
+	buyersActivesMock.On("GetBuyersActives", mock.Anything).Return(2, nil)
+	buyersActivesMock.On("Add", "some-token", mock.Anything).Return(nil)
+	virtualQueueMock.On("Dequeue", mock.Anything).Return("some-token", nil)
+	virtualQueueMock.On("GetAll", mock.Anything).Return([]string{"some-token1", "some-token-2"}, nil)
 	producerMock.On("Publish", mock.Anything).Return(nil)
 	processingVirtualQueueUseCase := NewProcessingVirtualQueueUseCase(
 		buyersActivesMock,
@@ -23,7 +24,7 @@ func Test_WhenActiveBuyersCapacityIsAvailable_Execute_NotifyWebsocket(t *testing
 		producerMock,
 	)
 
-	processingVirtualQueueUseCase.Execute()
+	processingVirtualQueueUseCase.Execute(context.Background())
 
 	assert.NoError(t, nil)
 	buyersActivesMock.AssertNumberOfCalls(t, "GetBuyersActives", 1)
@@ -37,14 +38,14 @@ func Test_WhenActiveBuyersCapacityIsNotAvailable_Execute_DontNotifyWebsocket(t *
 	buyersActivesMock := &mocks.BuyersActivesGatewayMock{}
 	virtualQueueMock := &mocks.VirtualQueueGatewayMock{}
 	producerMock := &mocks.ProducerMock{}
-	buyersActivesMock.On("GetBuyersActives").Return(5, nil)
+	buyersActivesMock.On("GetBuyersActives", mock.Anything).Return(5, nil)
 	processingVirtualQueueUseCase := NewProcessingVirtualQueueUseCase(
 		buyersActivesMock,
 		virtualQueueMock,
 		producerMock,
 	)
 
-	processingVirtualQueueUseCase.Execute()
+	processingVirtualQueueUseCase.Execute(context.Background())
 
 	assert.NoError(t, nil)
 	buyersActivesMock.AssertNumberOfCalls(t, "GetBuyersActives", 1)

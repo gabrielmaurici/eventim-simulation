@@ -1,6 +1,7 @@
 package entry_virtual_queue
 
 import (
+	"context"
 	"testing"
 
 	"github.com/gabrielmaurici/eventim-simulation/virtual-queue/internal/usecase/mocks"
@@ -17,11 +18,11 @@ func Test_WhenActiveBuyersCapacityIsAvailable_Execute_ReturnsExpectedOutput(t *t
 	}
 	buyersActivesGatewayMock := &mocks.BuyersActivesGatewayMock{}
 	virtualQueueGatewayMock := &mocks.VirtualQueueGatewayMock{}
-	buyersActivesGatewayMock.On("GetBuyersActives").Return(1, nil)
-	buyersActivesGatewayMock.On("Add", mock.Anything).Return(nil)
+	buyersActivesGatewayMock.On("GetBuyersActives", mock.Anything).Return(1, nil)
+	buyersActivesGatewayMock.On("Add", mock.Anything, mock.Anything).Return(nil)
 	entryVirtualQueueUsecase := NewEntryQueueUseCase(buyersActivesGatewayMock, virtualQueueGatewayMock)
 
-	output, _ := entryVirtualQueueUsecase.Execute()
+	output, _ := entryVirtualQueueUsecase.Execute(context.Background())
 
 	assert.Equal(t, len(outputExpected.Token), len(output.Token))
 	assert.Equal(t, outputExpected.Position, output.Position)
@@ -38,11 +39,11 @@ func Test_WhenActiveBuyersCapacityIsNotAvailable_Execute_ReturnsExpectedOutput(t
 	}
 	buyersActivesGatewayMock := &mocks.BuyersActivesGatewayMock{}
 	virtualQueueGatewayMock := &mocks.VirtualQueueGatewayMock{}
-	buyersActivesGatewayMock.On("GetBuyersActives").Return(10, nil)
-	virtualQueueGatewayMock.On("Enqueue", mock.Anything).Return(outputExpected.Position, nil)
+	buyersActivesGatewayMock.On("GetBuyersActives", mock.Anything).Return(10, nil)
+	virtualQueueGatewayMock.On("Enqueue", mock.Anything, mock.Anything).Return(outputExpected.Position, nil)
 	entryVirtualQueueUsecase := NewEntryQueueUseCase(buyersActivesGatewayMock, virtualQueueGatewayMock)
 
-	output, _ := entryVirtualQueueUsecase.Execute()
+	output, _ := entryVirtualQueueUsecase.Execute(context.Background())
 
 	assert.Equal(t, len(outputExpected.Token), len(output.Token))
 	assert.Equal(t, outputExpected.Position, output.Position)

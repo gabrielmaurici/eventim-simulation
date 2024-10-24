@@ -1,6 +1,7 @@
 package entry_virtual_queue
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/gabrielmaurici/eventim-simulation/virtual-queue/internal/gateway"
@@ -26,20 +27,20 @@ func NewEntryQueueUseCase(b gateway.BuyersActivesGateway, v gateway.VirtualQueue
 	}
 }
 
-func (uc *EntryVirtualQueueUseCase) Execute() (output *EntryVirtualQueueOutputUseCaseDTO, err error) {
+func (uc *EntryVirtualQueueUseCase) Execute(ctx context.Context) (output *EntryVirtualQueueOutputUseCaseDTO, err error) {
 	token, err := token.GenerateUniqueAccessToken()
 	if err != nil {
 		return nil, fmt.Errorf("erro ao gerar token de acesso único: %w", err)
 	}
 
-	totalBuyersActives, err := uc.BuyersActivesGateway.GetBuyersActives()
+	totalBuyersActives, err := uc.BuyersActivesGateway.GetBuyersActives(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("erro ao obter compradores ativos: %w", err)
 	}
 
 	var position int64
 	if totalBuyersActives < MaxBuyersActivesCapacity {
-		err = uc.BuyersActivesGateway.Add(token)
+		err = uc.BuyersActivesGateway.Add(token, ctx)
 		if err != nil {
 			return nil, fmt.Errorf("erro ao adicionar usuário ao grupo de compradores ativos: %w", err)
 		}
@@ -50,7 +51,7 @@ func (uc *EntryVirtualQueueUseCase) Execute() (output *EntryVirtualQueueOutputUs
 		}, nil
 	}
 
-	position, err = uc.VirtualQueueGateway.Enqueue(token)
+	position, err = uc.VirtualQueueGateway.Enqueue(token, ctx)
 	if err != nil {
 		return nil, fmt.Errorf("erro ao adicionar usuário a fila de espera: %w", err)
 	}
