@@ -35,6 +35,7 @@ func main() {
 	router := chi.NewRouter()
 	router.Use(middleware.Logger)
 	router.Post("/api/tickets/reserve", webTicketsReservationHandler.Reserve)
+	router.Post("/api/tickets/purchase", webTicketsReservationHandler.Purchase)
 	fmt.Println("Server is running!")
 
 	http.ListenAndServe(":3001", router)
