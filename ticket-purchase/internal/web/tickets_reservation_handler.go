@@ -38,3 +38,24 @@ func (h *WebTicketsReservationHandler) Reserve(w http.ResponseWriter, r *http.Re
 
 	w.WriteHeader(http.StatusNoContent)
 }
+
+func (h *WebTicketsReservationHandler) Purchase(w http.ResponseWriter, r *http.Request) {
+	ctx := context.Background()
+
+	var input reserve_ticket.ReserveTicketInputUseCaseDTO
+	err := json.NewDecoder(r.Body).Decode(&input)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	err = h.ReserverTicketsUseCase.Execute(input, ctx)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
