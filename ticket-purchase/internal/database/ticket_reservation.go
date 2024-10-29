@@ -83,3 +83,25 @@ func (trb *TicketReservationDb) GetAndDeleteExpiredTickets(ctx context.Context) 
 
 	return expiredTickets, nil
 }
+
+func (trb *TicketReservationDb) GetReservedTickets(userToken string, ctx context.Context) (reservedTickets []string, err error) {
+	ticketsReservationKey := listTicketsReservationKey + userToken
+	reservedTickets, err = trb.Db.LRange(ctx, ticketsReservationKey, 0, -1).Result()
+	if err != nil {
+		return nil, err
+	}
+
+	return reservedTickets, nil
+}
+
+func (trb *TicketReservationDb) DeleteReservedTickets(userToken string, ctx context.Context) error {
+	reservationKey := ticketReservationKey + userToken
+	ticketsReservationKey := listTicketsReservationKey + userToken
+
+	err := trb.Db.Del(ctx, reservationKey, ticketsReservationKey).Err()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

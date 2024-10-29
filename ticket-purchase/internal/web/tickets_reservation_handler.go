@@ -5,16 +5,21 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/gabrielmaurici/eventim-simulation/ticket-purchase/internal/usecase/buy_tickets"
 	"github.com/gabrielmaurici/eventim-simulation/ticket-purchase/internal/usecase/reserve_ticket"
 )
 
 type WebTicketsReservationHandler struct {
 	ReserverTicketsUseCase reserve_ticket.ReserveTicketUseCase
+	BuyTicketsUseCase      buy_tickets.BuyTicketsUseCase
 }
 
-func NewWebTicketsReservationHandler(uc reserve_ticket.ReserveTicketUseCase) *WebTicketsReservationHandler {
+func NewWebTicketsReservationHandler(
+	ucr reserve_ticket.ReserveTicketUseCase,
+	ucb buy_tickets.BuyTicketsUseCase) *WebTicketsReservationHandler {
 	return &WebTicketsReservationHandler{
-		ReserverTicketsUseCase: uc,
+		ReserverTicketsUseCase: ucr,
+		BuyTicketsUseCase:      ucb,
 	}
 }
 
@@ -39,24 +44,26 @@ func (h *WebTicketsReservationHandler) Reserve(w http.ResponseWriter, r *http.Re
 	w.WriteHeader(http.StatusNoContent)
 }
 
-// TODO
 func (h *WebTicketsReservationHandler) Purchase(w http.ResponseWriter, r *http.Request) {
-	// ctx := context.Background()
+	ctx := context.Background()
 
-	// var input reserve_ticket.ReserveTicketInputUseCaseDTO
-	// err := json.NewDecoder(r.Body).Decode(&input)
-	// if err != nil {
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// 	w.Write([]byte(err.Error()))
-	// 	return
-	// }
+	var input buy_tickets.BuyTicketsInputDTO
+	err := json.NewDecoder(r.Body).Decode(&input)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
 
-	// err = h.ReserverTicketsUseCase.Execute(input, ctx)
-	// if err != nil {
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// 	w.Write([]byte(err.Error()))
-	// 	return
-	// }
+	output, err := h.BuyTicketsUseCase.Execute(input, ctx)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
 
-	w.WriteHeader(http.StatusNoContent)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	json.NewEncoder(w).Encode(output)
 }
