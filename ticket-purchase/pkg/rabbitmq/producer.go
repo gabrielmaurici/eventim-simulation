@@ -15,9 +15,10 @@ type Producer struct {
 	Connection *amqp.Connection
 	Channel    *amqp.Channel
 	Exchange   string
+	RoutingKey string
 }
 
-func NewProducer(conn *amqp.Connection, exchange, exchangeKind string) (*Producer, error) {
+func NewProducer(conn *amqp.Connection, exchange, exchangeKind, routingKey string) (*Producer, error) {
 	ch, err := conn.Channel()
 	if err != nil {
 		return nil, fmt.Errorf("falha ao abrir canal: %w", err)
@@ -40,6 +41,7 @@ func NewProducer(conn *amqp.Connection, exchange, exchangeKind string) (*Produce
 		Connection: conn,
 		Channel:    ch,
 		Exchange:   exchange,
+		RoutingKey: routingKey,
 	}, nil
 }
 
@@ -51,7 +53,7 @@ func (p *Producer) Publish(msg interface{}) error {
 
 	err = p.Channel.Publish(
 		p.Exchange,
-		"",
+		p.RoutingKey,
 		false,
 		false,
 		amqp.Publishing{

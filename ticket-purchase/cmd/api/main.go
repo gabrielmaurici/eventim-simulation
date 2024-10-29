@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"math/rand/v2"
 	"net/http"
 
 	"github.com/gabrielmaurici/eventim-simulation/ticket-purchase/internal/database"
@@ -36,7 +37,7 @@ func main() {
 	}
 	defer rabbitmqConn.Close()
 
-	producer, err := rabbitmq.NewProducer(rabbitmqConn, "virtual_queue_exchange", "fanout")
+	producer, err := rabbitmq.NewProducer(rabbitmqConn, "buy_tickets_exchange", "direct", "buy_tickets_routing_key")
 	if err != nil {
 		panic(fmt.Errorf("erro ao criar produtor rabbitmq: %w", err))
 	}
@@ -44,13 +45,15 @@ func main() {
 	ticketDb := database.NewTicketDb(mysqlDb)
 	ticketReservationDb := database.NewTicketReservationDb(redisDb)
 	reserveTicketUseCase := reserve_ticket.NewReserveTicket(ticketDb, ticketReservationDb)
-	buyTicketsUseCase := buy_tickets.NewBuyTicketsUseCase(ticketReservationDb, producer)
-	webTicketsReservationHandler := web.NewWebTicketsReservationHandler(*reserveTicketUseCase, *buyTicketsUseCase)
+	buyTicketsUseCase := buy_tickets.NewBuyTicketsUseCase(ticketReservationDb, producer, func() bool {
+		return rand.Float64() < 0.5
+	})
+	webTicketsHandler := web.NewWebTicketsHandler(*reserveTicketUseCase, *buyTicketsUseCase)
 
 	router := chi.NewRouter()
 	router.Use(middleware.Logger)
-	router.Post("/api/tickets/reserve", webTicketsReservationHandler.Reserve)
-	router.Post("/api/tickets/purchase", webTicketsReservationHandler.Purchase)
+	router.Post("/api/tickets/reserve", webTicketsHandler.Reserve)
+	router.Post("/api/tickets/purchase", webTicketsHandler.Purchase)
 	fmt.Println("Server is running!")
 
 	http.ListenAndServe(":3001", router)

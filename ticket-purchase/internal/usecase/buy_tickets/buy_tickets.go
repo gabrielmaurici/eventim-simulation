@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"math/rand"
 
 	"github.com/gabrielmaurici/eventim-simulation/ticket-purchase/internal/gateway"
 	"github.com/gabrielmaurici/eventim-simulation/ticket-purchase/pkg/rabbitmq"
@@ -21,14 +20,17 @@ type BuyTicketsOutputDTO struct {
 type BuyTicketsUseCase struct {
 	TicketReservationGateway gateway.TicketReservationGateway
 	Producer                 rabbitmq.ProducerInterface
+	SimulatePaymentFunc      func() bool
 }
 
 func NewBuyTicketsUseCase(
 	trg gateway.TicketReservationGateway,
-	p rabbitmq.ProducerInterface) *BuyTicketsUseCase {
+	p rabbitmq.ProducerInterface,
+	spf func() bool) *BuyTicketsUseCase {
 	return &BuyTicketsUseCase{
 		TicketReservationGateway: trg,
 		Producer:                 p,
+		SimulatePaymentFunc:      spf,
 	}
 }
 
@@ -42,13 +44,13 @@ func (uc *BuyTicketsUseCase) Execute(input BuyTicketsInputDTO, ctx context.Conte
 		return nil, fmt.Errorf("erro ao obter a reserva dos ingressos: %w", err)
 	}
 
-	if reservedTickets == nil {
+	if len(reservedTickets) == 0 {
 		return nil, errors.New("reserva expirada ou inexistente")
 	}
 
-	payment := simulatePayment()
+	payment := uc.SimulatePaymentFunc()
 	if !payment {
-		return nil, errors.New("erro ao realizar pagamento, tente novament")
+		return nil, errors.New("erro ao realizar pagamento, tente novamente")
 	}
 
 	err = uc.TicketReservationGateway.DeleteReservedTickets(input.UserToken, ctx)
@@ -61,8 +63,4 @@ func (uc *BuyTicketsUseCase) Execute(input BuyTicketsInputDTO, ctx context.Conte
 	return &BuyTicketsOutputDTO{
 		TicketsPurchased: reservedTickets,
 	}, nil
-}
-
-func simulatePayment() bool {
-	return rand.Float64() < 0.7
 }
