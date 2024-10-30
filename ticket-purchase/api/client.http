@@ -3,8 +3,8 @@ POST http://localhost/api/tickets/reserve HTTP/1.1
 Content-Type: application/json
 
 {
-    "user_token": "1",
-    "quantity": 2
+    "user_token": "5c746e0fc522604c83157316a521c02f8fb0d0ad62df40e023a324f665fc4bc7",
+    "quantity": 1
 }
 
 ###
@@ -12,5 +12,5 @@ POST http://localhost/api/tickets/purchase HTTP/1.1
 Content-Type: application/json
 
 {
-    "user_token": "1"
+    "user_token": "5c746e0fc522604c83157316a521c02f8fb0d0ad62df40e023a324f665fc4bc7"
 }

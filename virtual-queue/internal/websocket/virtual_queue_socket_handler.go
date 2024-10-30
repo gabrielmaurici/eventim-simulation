@@ -2,7 +2,6 @@ package websocket
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"sync"
@@ -35,7 +34,6 @@ func NewWebSocketVirtualQueueHandler(msgChan chan []byte) *WebSocketVirtualQueue
 }
 
 func (s *WebSocketVirtualQueueHandler) NotifyPositionSocket(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("entrou aqui")
 	token := r.URL.Query().Get("token")
 	if token == "" {
 		http.Error(w, "Token não fornecido", http.StatusBadRequest)

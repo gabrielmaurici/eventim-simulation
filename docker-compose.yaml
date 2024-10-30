@@ -7,7 +7,7 @@ services:
     ports:
       - "6379:6379"
 
-  rabbitmq-virtual-queue:
+  rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
     ports:
@@ -21,7 +21,7 @@ services:
     build: 
       dockerfile: ./virtual-queue/Dockerfile.api
     command: >
-      dockerize -wait tcp://redis-virtual-queue:6379 -wait tcp://rabbitmq-virtual-queue:5672 -timeout 40s
+      dockerize -wait tcp://redis-virtual-queue:6379 -wait tcp://rabbitmq:5672 -timeout 40s
       go run ./cmd/api/main.go
     volumes:
       - ./virtual-queue:/app
@@ -29,32 +29,44 @@ services:
       replicas: 2
     depends_on:
       - redis-virtual-queue
-      - rabbitmq-virtual-queue
+      - rabbitmq
 
   websocket-virtual-queue: 
     build: 
       dockerfile: ./virtual-queue/Dockerfile.websocket
     command: >
-      dockerize -wait tcp://rabbitmq-virtual-queue:5672 -timeout 40s
+      dockerize -wait tcp://rabbitmq:5672 -timeout 40s
       go run ./cmd/websocket/main.go
     volumes:
       - ./virtual-queue:/app
     deploy:
       replicas: 2
     depends_on:
-      - rabbitmq-virtual-queue
+      - rabbitmq
 
   worker-virtual-queue: 
     build:
-      dockerfile: ./virtual-queue/Dockerfile.worker
+      dockerfile: ./virtual-queue/Dockerfile.worker_processing_virtual_queue
     command: >
-      dockerize -wait tcp://redis-virtual-queue:6379 -wait tcp://rabbitmq-virtual-queue:5672 -timeout 40s
-      go run ./cmd/worker/main.go
+      dockerize -wait tcp://redis-virtual-queue:6379 -wait tcp://rabbitmq:5672 -timeout 40s
+      go run ./cmd/worker/processing_virtual_queue/main.go
     volumes:
       - ./virtual-queue:/app
     depends_on:
       - redis-virtual-queue
-      - rabbitmq-virtual-queue
+      - rabbitmq
+
+  worker-buyers-actives:
+    build:
+      dockerfile: ./virtual-queue/Dockerfile.worker_processing_buyers_actives
+    command: >
+      dockerize -wait tcp://redis-virtual-queue:6379 -wait tcp://rabbitmq:5672 -timeout 40s
+      go run ./cmd/worker/processing_buyers_actives/main.go
+    volumes:
+      - ./virtual-queue:/app
+    depends_on:
+      - redis-virtual-queue
+      - rabbitmq
 
   nginx:
     image: nginx:1.27.2
@@ -88,7 +100,7 @@ services:
     build: 
       dockerfile: ./ticket-purchase/Dockerfile.api
     command: >
-      dockerize -wait tcp://redis-ticket-purchase:6379 -wait tcp://mysql-ticket-purchase:3306 -timeout 40s
+      dockerize -wait tcp://redis-ticket-purchase:6379 -wait tcp://mysql-ticket-purchase:3306 -wait tcp://rabbitmq:5672 -timeout 40s
       go run ./cmd/api/main.go
     volumes:
       - ./ticket-purchase:/app
@@ -97,6 +109,7 @@ services:
     depends_on:
       - redis-ticket-purchase
       - mysql-ticket-purchase
+      - rabbitmq
 
   worker-ticket-purchase: 
     build:

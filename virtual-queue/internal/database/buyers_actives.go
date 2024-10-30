@@ -2,7 +2,6 @@ package database
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -12,7 +11,7 @@ type BuyersActivesDb struct {
 	RedisDb *redis.Client
 }
 
-const buyersActivesCountKey string = "buyers_actives_count_key"
+const buyersActivesKey string = "buyers_actives:"
 
 func NewBuyersActivesDb(r *redis.Client) *BuyersActivesDb {
 	return &BuyersActivesDb{
@@ -21,28 +20,32 @@ func NewBuyersActivesDb(r *redis.Client) *BuyersActivesDb {
 }
 
 func (db *BuyersActivesDb) GetBuyersActives(ctx context.Context) (total int64, err error) {
-	expiration := fmt.Sprintf("%d", time.Now().Unix())
-	_, err = db.RedisDb.ZRemRangeByScore(ctx, buyersActivesCountKey, "-inf", expiration).Result()
-	if err != nil {
-		return 0, err
-	}
+	pattern := buyersActivesKey + "*"
+	var cursor uint64
+	var count int
 
-	total, err = db.RedisDb.ZCount(ctx, buyersActivesCountKey, expiration, "+inf").Result()
-	if err != nil {
-		return 0, err
+	for {
+		keys, nextCursor, err := db.RedisDb.Scan(ctx, cursor, pattern, 6).Result()
+		if err != nil {
+			return 0, err
+		}
+		count += len(keys)
+		cursor = nextCursor
+
+		if cursor == 0 {
+			break
+		}
 	}
-	return total, nil
+	return int64(count), nil
 }
 
 func (db *BuyersActivesDb) Add(token string, ctx context.Context) error {
-	expiration := time.Now().Add(30 * time.Second).Unix()
-	err := db.RedisDb.ZAdd(ctx, buyersActivesCountKey, redis.Z{
-		Score:  float64(expiration),
-		Member: token,
-	}).Err()
-	if err != nil {
-		return err
-	}
+	expiration := 30 * time.Second
+	key := buyersActivesKey + token
+	return db.RedisDb.Set(ctx, key, token, expiration).Err()
+}
 
-	return nil
+func (db *BuyersActivesDb) Delete(token string, ctx context.Context) error {
+	key := buyersActivesKey + token
+	return db.RedisDb.Del(ctx, key).Err()
 }

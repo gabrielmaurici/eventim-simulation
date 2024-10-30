@@ -12,7 +12,7 @@ type Consumer struct {
 	QueueName  string
 }
 
-func NewConsumer(conn *amqp.Connection, queueName, exchange, exchangeKind string) (*Consumer, error) {
+func NewConsumer(conn *amqp.Connection, queueName, exchange, routingKey, exchangeKind string) (*Consumer, error) {
 	ch, err := conn.Channel()
 	if err != nil {
 		return nil, fmt.Errorf("falha ao abrir canal: %w", err)
@@ -45,7 +45,7 @@ func NewConsumer(conn *amqp.Connection, queueName, exchange, exchangeKind string
 
 	err = ch.QueueBind(
 		q.Name,
-		"",
+		routingKey,
 		exchange,
 		false,
 		nil,
