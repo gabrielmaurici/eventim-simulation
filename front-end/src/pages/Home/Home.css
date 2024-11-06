@@ -1,47 +1,57 @@
 .home-page {
-    font-family: Arial, sans-serif;
-    padding: 20px;
+  font-family: Arial, sans-serif;
+  padding: 20px;
+  text-align: center;
 }
 
 .events-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
 }
 
 .event-card {
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    padding: 15px;
-    width: calc(25% - 20px);
-    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s, box-shadow 0.3s;
-}
-
-.event-card.open-ticket {
-    cursor: pointer;
-}
-
-.event-card.open-ticket:hover {
-    transform: translateY(-5px);
-    box-shadow: 4px 4px 15px rgba(0, 0, 0, 0.2);
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 15px;
+  width: calc(25% - 20px);
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+  text-align: left;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  text-decoration: none;
+  color: #e8e6e3;
 }
 
 .event-card h2 {
-    margin: 0;
-    color: #333;
+  margin: 0;
+  color: #333;
 }
 
 .event-card p {
-    margin: 5px 0;
+  margin: 5px 0;
 }
 
 .open-ticket {
-    border-color: #4caf50;
-    background-color: #e8f5e9;
+  border-color: #4caf50;
+  background-color: #e8f5e9;
 }
 
 .ticket-status {
-    color: #4caf50;
-    font-weight: bold;
+  color: #4caf50;
+  font-weight: bold;
+}
+
+.closed-ticket {
+  color: yellow;
+  font-weight: bold;
+}
+
+.event-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.event-card.open-ticket:hover {
+  cursor: pointer;
 }

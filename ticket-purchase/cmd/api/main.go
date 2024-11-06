@@ -16,6 +16,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/redis/go-redis/v9"
+	"github.com/rs/cors"
 )
 
 func main() {
@@ -50,8 +51,16 @@ func main() {
 	})
 	webTicketsHandler := web.NewWebTicketsHandler(*reserveTicketUseCase, *buyTicketsUseCase)
 
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:8080"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE"},
+		AllowedHeaders:   []string{"Content-Type", "Authorization"},
+		AllowCredentials: true,
+	})
+
 	router := chi.NewRouter()
 	router.Use(middleware.Logger)
+	router.Use(c.Handler)
 	router.Post("/api/tickets/reserve", webTicketsHandler.Reserve)
 	router.Post("/api/tickets/purchase", webTicketsHandler.Purchase)
 	fmt.Println("Server is running!")

@@ -1,12 +1,19 @@
-import './App.css';
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Home from './pages/Home/Home';
+import Ticket from './pages/Ticket/Ticket';
+import VirtualQueue from './pages/VirtualQueue/VirtualQueue';
 
-function App() {
+const App: React.FC = () => {
   return (
-    <div className="App">
-      <Home/>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/ticket/:eventId" element={<Ticket />} />
+        <Route path="/virtual-queue/:userToken" element={<VirtualQueue />} />
+      </Routes>
+    </Router>
   );
-}
+};
 
 export default App;

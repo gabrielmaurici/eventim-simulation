@@ -1,6 +1,15 @@
 version: '3.9'
 
 services:
+  front-end:
+    build:
+      context: ./front-end
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    volumes:
+      - ./front-end:/app/usr/share/nginx/html
+
   redis-virtual-queue:
     image: redis:8.0-M01
     container_name: redis-local
@@ -19,7 +28,8 @@ services:
 
   api-virtual-queue: 
     build: 
-      dockerfile: ./virtual-queue/Dockerfile.api
+      context: ./virtual-queue
+      dockerfile: Dockerfile.api
     command: >
       dockerize -wait tcp://redis-virtual-queue:6379 -wait tcp://rabbitmq:5672 -timeout 40s
       go run ./cmd/api/main.go
@@ -33,7 +43,8 @@ services:
 
   websocket-virtual-queue: 
     build: 
-      dockerfile: ./virtual-queue/Dockerfile.websocket
+      context: ./virtual-queue
+      dockerfile: Dockerfile.websocket
     command: >
       dockerize -wait tcp://rabbitmq:5672 -timeout 40s
       go run ./cmd/websocket/main.go
@@ -46,7 +57,8 @@ services:
 
   worker-virtual-queue: 
     build:
-      dockerfile: ./virtual-queue/Dockerfile.worker_processing_virtual_queue
+      context: ./virtual-queue
+      dockerfile: Dockerfile.worker_processing_virtual_queue
     command: >
       dockerize -wait tcp://redis-virtual-queue:6379 -wait tcp://rabbitmq:5672 -timeout 40s
       go run ./cmd/worker/processing_virtual_queue/main.go
@@ -58,7 +70,8 @@ services:
 
   worker-buyers-actives:
     build:
-      dockerfile: ./virtual-queue/Dockerfile.worker_processing_buyers_actives
+      context: ./virtual-queue
+      dockerfile: Dockerfile.worker_processing_buyers_actives
     command: >
       dockerize -wait tcp://redis-virtual-queue:6379 -wait tcp://rabbitmq:5672 -timeout 40s
       go run ./cmd/worker/processing_buyers_actives/main.go
@@ -98,7 +111,8 @@ services:
 
   api-ticket-purchase: 
     build: 
-      dockerfile: ./ticket-purchase/Dockerfile.api
+      context: ./ticket-purchase
+      dockerfile: Dockerfile.api
     command: >
       dockerize -wait tcp://redis-ticket-purchase:6379 -wait tcp://mysql-ticket-purchase:3306 -wait tcp://rabbitmq:5672 -timeout 40s
       go run ./cmd/api/main.go
@@ -113,7 +127,8 @@ services:
 
   worker-ticket-purchase: 
     build:
-      dockerfile: ./ticket-purchase/Dockerfile.worker
+      context: ./ticket-purchase
+      dockerfile: Dockerfile.worker
     command: >
      dockerize -wait tcp://redis-ticket-purchase:6379 -wait tcp://mysql-ticket-purchase:3306 -timeout 40s
       go run ./cmd/worker/main.go

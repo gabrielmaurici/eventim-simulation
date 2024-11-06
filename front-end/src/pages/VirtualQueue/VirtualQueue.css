@@ -1,0 +1,41 @@
+.virtual-queue-page {
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f4f4f9;
+    padding: 20px;
+}
+
+.virtual-queue-page h1 {
+    margin-bottom: 20px;
+    color: #333;
+    text-align: center;
+}
+
+.queue-status {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+}
+
+.queue-status h2 {
+    color: #1f9e06;
+    margin-bottom: 10px;
+}
+
+.queue-status p {
+    color: #555;
+}
+
+.loading-message, .error-message {
+    color: #666;
+    font-size: 18px;
+    text-align: center;
+}

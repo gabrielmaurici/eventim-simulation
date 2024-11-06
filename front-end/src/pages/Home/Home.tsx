@@ -1,5 +1,13 @@
 import React from 'react';
+import Cookies from 'js-cookie';
+import { useNavigate } from 'react-router-dom';
+import virtualQueueApi from '../../services/virtual-queue-api'
 import './Home.css';
+
+interface VirtualQueuePostResponse {
+  token: string,
+  position: number
+}
 
 interface Event {
   id: number;
@@ -30,31 +38,58 @@ const events: Event[] = [
     date: '2024-11-15',
     description: 'Uma tarde de samba e alegria na praça central.',
     ticketOpen: false,
-  },
-  {
-    id: 4,
-    name: 'Noite de Jazz',
-    date: '2024-11-25',
-    description: 'Uma noite sofisticada ao som do melhor jazz.',
-    ticketOpen: false,
-  },
+  }
 ];
 
 const Home: React.FC = () => {
+  const navigate = useNavigate();
+
+  const handleEventClick = async (id: number) => {
+    const userToken = Cookies.get('userToken');
+    if (userToken) {
+      navigate(`/virtual-queue/${userToken}`)
+    }
+
+    try {
+      const data = await virtualQueueApi.post<ResponseType | null, VirtualQueuePostResponse>("api/virtual-queue")
+      if (data) {
+        Cookies.set("userToken", data?.token)
+        
+        data.position > 0 
+          ? navigate(`/virtual-queue/${data.token}`)
+          : navigate(`/ticket/${id}`);
+      }
+    } catch (error) {
+      alert(error)
+    };
+  };
+
   return (
     <div className="home-page">
-      <h1>Eventim</h1>
+      <h1>Eventos Disponíveis</h1>
       <div className="events-list">
-        {events.map(event => (
-          <div
-            key={event.id}
-            className={`event-card ${event.ticketOpen ? 'open-ticket' : ''}`}
-          >
-            <h2>{event.name}</h2>
-            <p><strong>Data:</strong> {event.date}</p>
-            <p>{event.description}</p>
-            {event.ticketOpen && <p className="ticket-status">Bilheteria Aberta</p>}
-          </div>
+        {events.map((event) => (
+          event.ticketOpen ? (
+            <div
+              className="event-card open-ticket"
+              onClick={() => handleEventClick(event.id)}
+            >
+              <h2>{event.name}</h2>
+              <p><strong>Data:</strong> {event.date}</p>
+              <p>{event.description}</p>
+              <p className="ticket-status open-ticket">Bilheteira Aberta</p>
+            </div>
+          ) : (
+            <div
+              key={event.id}
+              className="event-card"
+            >
+              <h2>{event.name}</h2>
+              <p><strong>Data:</strong> {event.date}</p>
+              <p>{event.description}</p>
+              <p className="ticket-status closed-ticket">Bilheteira Fechada</p>
+            </div>
+          )
         ))}
       </div>
     </div>
