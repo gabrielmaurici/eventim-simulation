@@ -29,8 +29,7 @@ const VirtualQueue: React.FC = () => {
 
   useEffect(() => {
     if (data && data.position == 0) {
-      console.log('indo pro ticket')
-      navigate(`/ticket/${eventId}`);
+      navigate(`/ticket/${eventId}/${userToken}`);
     }
 
     if (data && data.estimatedWaitTime > 0) {

@@ -3,7 +3,6 @@ package web
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/gabrielmaurici/eventim-simulation/ticket-purchase/internal/usecase/buy_tickets"
@@ -51,17 +50,13 @@ func (h *WebTicketsHandler) Purchase(w http.ResponseWriter, r *http.Request) {
 	var input buy_tickets.BuyTicketsInputDTO
 	err := json.NewDecoder(r.Body).Decode(&input)
 	if err != nil {
-		fmt.Println("erro")
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
 		return
 	}
-	fmt.Println("passsou " + input.UserToken)
 
 	output, err := h.BuyTicketsUseCase.Execute(input, ctx)
 	if err != nil {
-		fmt.Println("erro 2 " + err.Error())
-
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
 		return

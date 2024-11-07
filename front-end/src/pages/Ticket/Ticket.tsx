@@ -1,18 +1,37 @@
 import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import eventimSimulationApi from '../../services/eventim-simulaiton-api'
 import './Ticket.css';
 
+interface ReserveInput {
+  user_token: string,
+  quantity: number
+}
+
 const Ticket: React.FC = () => {
-  const { eventId } = useParams<{ eventId: string }>();
+  const navigate = useNavigate();
+  const { userToken } = useParams<{userToken: string}>();
+  const { eventId } = useParams<{eventId: string}>();
   const [ticketCount, setTicketCount] = useState<number>(1);
 
   const handleTicketChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setTicketCount(Number(event.target.value));
   };
 
-  const handlePurchase = () => {
-    // lógica de compra de ingressos
-    alert(`Comprando ${ticketCount} ingresso(s) para o evento ${eventId}`);
+  const handleReserve = async () => {
+    try {
+      const endpoint = "api/tickets/reserve"
+      const body: ReserveInput = {
+        user_token: userToken!,
+        quantity: ticketCount
+      };
+      
+      await eventimSimulationApi.post<ReserveInput, ResponseType | null>(endpoint, body);
+
+      navigate(`/buy-tickets/${userToken}/${eventId}`);
+    } catch(error) {
+      alert("Ocorreu algum erro ao reservar os ingressos: " + error);
+    }
   };
 
   return (
@@ -29,7 +48,7 @@ const Ticket: React.FC = () => {
             onChange={handleTicketChange}
           />
         </label>
-        <button onClick={handlePurchase}>Comprar</button>
+        <button onClick={handleReserve}>Reservar</button>
       </div>
     </div>
   );

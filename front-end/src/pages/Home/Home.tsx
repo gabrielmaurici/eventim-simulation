@@ -1,7 +1,7 @@
 import React from 'react';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
-import virtualQueueApi from '../../services/virtual-queue-api'
+import eventimSimulationApi from '../../services/eventim-simulaiton-api'
 import './Home.css';
 
 interface VirtualQueuePostResponse {
@@ -51,13 +51,13 @@ const Home: React.FC = () => {
     }
 
     try {
-      const data = await virtualQueueApi.post<ResponseType | null, VirtualQueuePostResponse>("api/virtual-queue")
+      const data = await eventimSimulationApi.post<ResponseType | null, VirtualQueuePostResponse>("api/virtual-queue")
       if (data) {
         Cookies.set("userToken", data?.token)
         
         data.position > 0 
           ? navigate(`/virtual-queue/${data.token}/${eventId}`)
-          : navigate(`/ticket/${eventId}`);
+          : navigate(`/ticket/${eventId}/${data.token}`);
       }
     } catch (error) {
       alert(error)

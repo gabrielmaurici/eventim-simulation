@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 
 const api = axios.create({
   baseURL: 'http://localhost/',
@@ -7,17 +7,22 @@ const api = axios.create({
   },
 });
 
-const virtualQueueApiMethods = {
+const eventimSimulationMethodsApi = {
   async post<I, R>(endpoint: string, data?: I | null): Promise<R | null> {
     try {
       const response = await api.post(endpoint, data);
-      if (response.status != 200)
-        throw new Error("Erro ao realizar request " + endpoint)
       return response.data;
     } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+        if (status === 500 || status == 400) {
+          throw new Error(error.response?.data);
+        }
+      }
+
       throw error;
     }
   },
 };
-  
-export default virtualQueueApiMethods;
+
+export default eventimSimulationMethodsApi;
