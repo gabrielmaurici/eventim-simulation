@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import eventimSimulationApi from '../../services/eventim-simulaiton-api';
 import TicketsModal from '../../components/TicketsModal/TicketsModal';
 import './BuyTickets.css';
@@ -19,6 +19,7 @@ interface Ticket {
 }
 
 const BuyTickets: React.FC = () => {
+  const navigate = useNavigate()
   const { userToken } = useParams<{ userToken: string }>();
   const { eventId } = useParams<{ eventId: string }>();
   const [tickets, setTickets] = useState<Ticket[] | null>(null);
@@ -40,6 +41,11 @@ const BuyTickets: React.FC = () => {
     }
   };
 
+  const handleCloseModal = () => {
+    setTickets(null);
+    navigate('/');
+  };
+
   return (
     <div className="buy-tickets-page">
       <div className="buy-tickets-container">
@@ -48,7 +54,7 @@ const BuyTickets: React.FC = () => {
         <p>Revise suas informações e confirme a compra.</p>
         <button onClick={handleConfirmPurchase}>Confirmar Compra</button>
       </div>
-      {tickets && <TicketsModal tickets={tickets} onClose={() => setTickets(null)} />}
+      {tickets && <TicketsModal tickets={tickets} onClose={handleCloseModal} />}
     </div>
   );
 };
