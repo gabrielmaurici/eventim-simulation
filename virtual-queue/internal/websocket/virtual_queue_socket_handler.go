@@ -10,8 +10,9 @@ import (
 )
 
 type NotificationRabbitMQModel struct {
-	Token    string `json:"token"`
-	Position int64  `json:"position"`
+	Token             string `json:"token"`
+	Position          int64  `json:"position"`
+	EstimatedWaitTime int64  `json:"estimated_wait_time"`
 }
 
 type WebSocketVirtualQueueHandler struct {

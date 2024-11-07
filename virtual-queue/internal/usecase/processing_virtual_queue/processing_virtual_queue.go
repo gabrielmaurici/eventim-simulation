@@ -9,8 +9,9 @@ import (
 )
 
 type NotificationPositionRabbitMQ struct {
-	Token    string `json:"token"`
-	Position int64  `json:"position"`
+	Token             string `json:"token"`
+	Position          int64  `json:"position"`
+	EstimatedWaitTime int64  `json:"estimated_wait_time"`
 }
 
 type ProcessingVirtualQueueUseCase struct {
@@ -74,9 +75,12 @@ func (uc *ProcessingVirtualQueueUseCase) updateAndNotificationPositionVirtualQue
 
 	for index, token := range tokensInQueue {
 		position := index + 1
+		avarageWaitTimeInSeconds := 30
+		estimatedWaitTime := position * avarageWaitTimeInSeconds
 		uc.Producer.Publish(NotificationPositionRabbitMQ{
-			Token:    token,
-			Position: int64(position),
+			Token:             token,
+			Position:          int64(position),
+			EstimatedWaitTime: int64(estimatedWaitTime),
 		})
 	}
 }
