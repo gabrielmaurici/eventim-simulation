@@ -10,7 +10,7 @@ const App: React.FC = () => {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/ticket/:eventId" element={<Ticket />} />
-        <Route path="/virtual-queue/:userToken" element={<VirtualQueue />} />
+        <Route path="/virtual-queue/:userToken/:eventId" element={<VirtualQueue />} />
       </Routes>
     </Router>
   );

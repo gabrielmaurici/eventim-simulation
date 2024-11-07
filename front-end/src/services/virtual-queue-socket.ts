@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 
 export interface QueueData {
+    userToken: string;
     position: number;
     estimatedWaitTime: number;
-    userToken: string;
 }
 
 export const useVirtualQueueSocket = (endpoint: string) => {
@@ -16,7 +16,15 @@ export const useVirtualQueueSocket = (endpoint: string) => {
         const socket = new WebSocket(url);
 
         socket.onopen = () => setIsConnected(true);
-        socket.onmessage = (event) => setData(JSON.parse(event.data));
+        socket.onmessage = (event) =>  {
+            const data = JSON.parse(event.data);
+            const mappedData: QueueData = {
+                userToken: data.token,
+                position: data.position,
+                estimatedWaitTime: data.estimated_wait_time
+            };
+            setData(mappedData);
+        }
         socket.onerror = () => setError('Erro no WebSocket');
         socket.onclose = () => setIsConnected(false);
 

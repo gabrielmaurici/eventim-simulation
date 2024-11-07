@@ -44,10 +44,10 @@ const events: Event[] = [
 const Home: React.FC = () => {
   const navigate = useNavigate();
 
-  const handleEventClick = async (id: number) => {
+  const handleEventClick = async (eventId: number) => {
     const userToken = Cookies.get('userToken');
     if (userToken) {
-      navigate(`/virtual-queue/${userToken}`)
+      navigate(`/virtual-queue/${userToken}/${eventId}`)
     }
 
     try {
@@ -56,8 +56,8 @@ const Home: React.FC = () => {
         Cookies.set("userToken", data?.token)
         
         data.position > 0 
-          ? navigate(`/virtual-queue/${data.token}`)
-          : navigate(`/ticket/${id}`);
+          ? navigate(`/virtual-queue/${data.token}/${eventId}`)
+          : navigate(`/ticket/${eventId}`);
       }
     } catch (error) {
       alert(error)
