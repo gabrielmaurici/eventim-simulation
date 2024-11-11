@@ -3,6 +3,9 @@
 ![eventim-simulation](https://github.com/user-attachments/assets/e6e94927-a182-42da-89d1-1afc3a702d78)
 
 
+![Eventim Simulation GIF](https://github.com/user-attachments/assets/0cafe349-c43a-4ef6-beb2-64c21e900164)
+
+
 Bot de WhatsApp desenvolvido em Node.js que realiza chamadas gRPC para um server .NET. O server .NET integra as APIs da OpenAI, permitindo interações com DALL-E e ChatGPT. Além disso, o projeto inclui um serviço de web scraping que coleta dados sobre resultados e próximas partidas de futebol.
 
 
