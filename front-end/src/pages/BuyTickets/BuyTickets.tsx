@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import eventimSimulationApi from '../../services/eventim-simulaiton-api';
 import TicketsModal from '../../components/TicketsModal/TicketsModal';
+import Cookies from 'js-cookie';
 import './BuyTickets.css';
 
 interface BuyTicketsInput {
@@ -57,6 +58,7 @@ const BuyTickets: React.FC = () => {
 
   const handleCloseModal = () => {
     setTickets(null);
+    Cookies.remove("userToken");
     navigate('/');
   };
 
